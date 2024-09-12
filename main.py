@@ -3,31 +3,30 @@
 # DATA_FILE = 'data/dialog_acts.dat'
 
 def return_most_freq_label():
-    dialog_act_list = []
+    label_list = []
 
     # read data file
-    with open('data/dialog_acts.dat','r') as f:
+    with open('data/dialog_acts.dat','r') as file:
         # for each line of the data file
-        for line in f:
+        for line in file:
             # get the first word of each line which is the label (dialog act) and append it in the list
-            dialog_act_list.append(line.split(' ')[0])
+            label_list.append(line.split()[0])
 
-    # make a dictionary with the label and the number of occurences
+    # make a dictionary with unique labels as keys and their frequency in the label list as values
     label_counter = {}
-    for label in dialog_act_list:
+    for label in label_list:
         if label in label_counter:
             label_counter[label] += 1
         else:
             label_counter[label] = 1
 
-    # sort the dictionary by the number of occurences
-    frequent_labels = sorted(label_counter, key = label_counter.get, reverse = True)
+    # get the most frequent label
+    most_frequent_label = max(label_counter, key=label_counter.get)
 
-    # get the most frequent (majority) label
-    top_1 = frequent_labels[:1]
+    print("Percentage of most most frequent label:", label_counter[most_frequent_label]/len(label_list))
 
-    # return the most frequent (majority) label 
-    return(top_1[0])
+    # return the most frequent label
+    return most_frequent_label
 
 def baseline_model_most_freq_label_predict(utterance):
     y_pred = return_most_freq_label()
