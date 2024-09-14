@@ -105,23 +105,44 @@ def rule_based_get_label(utterance):
         predicted_label: The predicted label.
     """
 
+    # The labels in the dictionary are ordered based on the frequency of the labels in the dataset.
+    # This will prioritize checking the more frequent labels first, which could lead to better performance as well.
+
     rules = {
-        'inform': ['restaurant', 'food', 'place'],
-        'request': ['what is', 'where is', 'can you tell'],
-        'thankyou': ['thank', 'thanks'],
-        'reqalts': ['how about', 'alternative'],
-        'null': ['cough', 'noise'],
-        'affirm': ['yes', 'right', 'correct', 'sure'],
-        'negate': ['no', 'not'],
-        'bye': ['goodbye', 'bye', 'see you'],
-        'confirm': ['confirm', 'is it', 'check if'],
-        'hello': ['hi', 'hello', 'hey'],
-        'repeat': ['repeat', 'say again'],
+        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'find'],
+        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location'],
+        'thankyou': ['thank', 'thanks', 'appreciate it', 'grateful'],
+        'reqalts': ['how about', 'alternative', 'other options', 'alternatives'],
+        'null': ['cough', 'noise', 'laugh', 'uh'],
+        'affirm': ['yes', 'right', 'correct', 'sure', 'absolutely', 'definitely'],
+        'negate': ['no', 'not', 'don\'t', 'nope'],
+        'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later'],
+        'confirm': ['confirm', 'is it', 'check if', 'correct?', 'right?'],
+        'hello': ['hi', 'hello', 'hey', 'greetings'],
+        'repeat': ['repeat', 'say again', 'can you repeat'],
         'ack': ['okay', 'um', 'uh-huh'],
-        'deny': ['dont want', 'reject', "don't want"],
-        'restart': ['restart', 'start over'],
-        'reqmore': ['more']
+        'deny': ['dont want', 'don\'t want', 'reject', 'no', 'not that', 'not this'],
+        'restart': ['restart', 'start over', 'begin again', 'reset'],
+        'reqmore': ['more', 'additional', 'other', 'else'],
     }
+
+    # rules = {
+    #     'inform': ['restaurant', 'food', 'place'],
+    #     'request': ['what is', 'where is', 'can you tell'],
+    #     'thankyou': ['thank', 'thanks'],
+    #     'reqalts': ['how about', 'alternative'],
+    #     'null': ['cough', 'noise'],
+    #     'affirm': ['yes', 'right', 'correct', 'sure'],
+    #     'negate': ['no', 'not'],
+    #     'bye': ['goodbye', 'bye', 'see you'],
+    #     'confirm': ['confirm', 'is it', 'check if'],
+    #     'hello': ['hi', 'hello', 'hey'],
+    #     'repeat': ['repeat', 'say again'],
+    #     'ack': ['okay', 'um', 'uh-huh'],
+    #     'deny': ['dont want', 'reject', "don't want"],
+    #     'restart': ['restart', 'start over'],
+    #     'reqmore': ['more']
+    # }
 
     for label, keywords in rules.items():
         if any(keyword in utterance for keyword in keywords):
