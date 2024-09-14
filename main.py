@@ -64,7 +64,7 @@ def baseline_model_majority_label_predict(df, X_test):
         y_pred.append(majority_label)
     return y_pred
 
-def rule_based_get_label(utterance):
+def rule_based_model_get_label(utterance):
     """Predicts the label based on keyword matching rules using a dictionary.
 
     Args:
@@ -113,7 +113,7 @@ def rule_based_model_predict(X_test):
     """
     y_pred = []
     for utterance in X_test:
-        y_pred.append(rule_based_get_label(utterance))
+        y_pred.append(rule_based_model_get_label(utterance))
     return y_pred
 
 def print_metrics(y_test, y_pred):
@@ -154,6 +154,21 @@ def main():
     y_pred = rule_based_model_predict(X_test)
 
     print_metrics(y_test, y_pred)
+
+    # interactive prediction
+    while True:
+        # Get input from the user
+        user_utterance = input("\nEnter an utterance (or type 'exit' to quit): ").lower()
+
+        # Check if the user wants to exit
+        if user_utterance == 'exit':
+            print("Exiting...")
+            break
+
+        # Predict the label using the rule-based model
+        predicted_label = rule_based_model_get_label(user_utterance)
+        # predicted_label = rule_based_model_predict([user_utterance])[0]
+        print(f"Predicted label: {predicted_label}")
 
 # Run the main function
 main()
