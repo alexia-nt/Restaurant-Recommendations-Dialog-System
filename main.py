@@ -20,8 +20,8 @@ def create_dataframe(data_file):
     with open(data_file, 'r') as file:
         for line in file:
             label, utterance = line.split(maxsplit=1)
-            labels.append(label)
-            utterances.append(utterance)
+            labels.append(label.lower())
+            utterances.append(utterance.lower())
 
     data_dict = {'label': labels, 'utterance': utterances}
     df = pd.DataFrame(data_dict)
