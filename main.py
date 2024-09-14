@@ -28,37 +28,6 @@ def create_dataframe(data_file):
 
     return df
 
-def return_majority_label(data_file):
-    """Returns the most frequent label in the data file.
-
-    Args:
-        data_file: The path of the data file.
-
-    Returns:
-        majority_label: The most frequent label in the data file.
-    """
-
-    label_list = []
-    with open(data_file, 'r') as file:
-        for line in file:
-            label_list.append(line.split()[0])  # Get the first word of each line as the label
-
-    # make a dictionary with unique labels as keys and their frequency in the label list as values
-    label_counter = {}
-    for label in label_list:
-        if label in label_counter:
-            label_counter[label] += 1
-        else:
-            label_counter[label] = 1
-
-    # get the most frequent label
-    majority_label = max(label_counter, key=label_counter.get)
-
-    # print("Percentage of most most frequent label:", label_counter[majority_label]/len(label_list))
-
-    # return the most frequent label
-    return majority_label
-
 def return_majority_label_from_df(df):
     """Returns the most frequent label in the DataFrame.
 
