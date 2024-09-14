@@ -54,15 +54,36 @@ def return_majority_label(data_file):
     # get the most frequent label
     majority_label = max(label_counter, key=label_counter.get)
 
-    print("Percentage of most most frequent label:", label_counter[majority_label]/len(label_list))
+    # print("Percentage of most most frequent label:", label_counter[majority_label]/len(label_list))
 
     # return the most frequent label
     return majority_label
 
-def baseline_model_majority_label_predict(X_test):
+def return_majority_label_from_df(df):
+    """Returns the most frequent label in the DataFrame.
+
+    Args:
+        df: A Pandas DataFrame with 'label' and 'utterance' columns.
+
+    Returns:
+        majority_label: The most frequent label in the DataFrame.
+    """
+
+    # Count occurrences of each label
+    label_counts = df['label'].value_counts()
+
+    # Get the most frequent label
+    majority_label = label_counts.index[0]
+
+    # print("Percentage of most most frequent label:", label_counts[0]/len(df))
+
+    return majority_label
+
+def baseline_model_majority_label_predict(df, X_test):
     y_pred = []
-    majority_label = return_majority_label(DATA_FILE)
-    for utterance in X_test:
+    # majority_label = return_majority_label(DATA_FILE)
+    majority_label = return_majority_label_from_df(df)
+    for _ in X_test: # for every utterance in X_test
         y_pred.append(majority_label)
     return y_pred
 
@@ -94,7 +115,7 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Make predictions on the test set
-    y_pred = baseline_model_majority_label_predict(X_test)
+    y_pred = baseline_model_majority_label_predict(df, X_test)
 
     print_metrics(y_test, y_pred)
 
