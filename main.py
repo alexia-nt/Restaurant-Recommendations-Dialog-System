@@ -80,14 +80,77 @@ def return_majority_label_from_df(df):
     return majority_label
 
 def baseline_model_majority_label_predict(df, X_test):
+    """Predicts the majority label for all utterances in the test set.
+
+    Args:
+        df: A Pandas DataFrame containing the training data.
+        X_test: A list or Series of test utterances.
+
+    Returns:
+        y_pred: A list of predicted labels (the majority label).
+    """
     y_pred = []
-    # majority_label = return_majority_label(DATA_FILE)
     majority_label = return_majority_label_from_df(df)
     for _ in X_test: # for every utterance in X_test
         y_pred.append(majority_label)
     return y_pred
 
+def rule_based_get_label(utterance):
+    """Predicts the label based on keyword matching rules using a dictionary.
+
+    Args:
+        utterance: The input utterance.
+
+    Returns:
+        predicted_label: The predicted label.
+    """
+
+    rules = {
+        'inform': ['restaurant', 'food', 'place'],
+        'request': ['what is', 'where is', 'can you tell'],
+        'thankyou': ['thank', 'thanks'],
+        'reqalts': ['how about', 'alternative'],
+        'null': ['cough', 'noise'],
+        'affirm': ['yes', 'right', 'correct', 'sure'],
+        'negate': ['no', 'not'],
+        'bye': ['goodbye', 'bye', 'see you'],
+        'confirm': ['confirm', 'is it', 'check if'],
+        'hello': ['hi', 'hello', 'hey'],
+        'repeat': ['repeat', 'say again'],
+        'ack': ['okay', 'um', 'uh-huh'],
+        'deny': ['dont want', 'reject', "don't want"],
+        'restart': ['restart', 'start over'],
+        'reqmore': ['more']
+    }
+
+    for label, keywords in rules.items():
+        if any(keyword in utterance for keyword in keywords):
+            return label
+
+    # Default label if no keyword matches
+    return 'inform'
+
+def rule_based_model_predict(X_test):
+    """Predicts labels for the test set using a rule-based model.
+
+    Args:
+        X_test: A list or Pandas Series of test utterances.
+
+    Returns:
+        y_pred: A list of predicted labels corresponding to the test utterances.
+    """
+    y_pred = []
+    for utterance in X_test:
+        y_pred.append(rule_based_get_label(utterance))
+    return y_pred
+
 def print_metrics(y_test, y_pred):
+    """Prints classification metrics for a given test set labels and predicted labels.
+
+    Args:
+        y_test: The actual labels of the test set.
+        y_pred: The predicted labels for the test set.
+    """
 
     print("\nClassification Report:")
     print(classification_report(y_test, y_pred))
@@ -112,10 +175,11 @@ def main():
     y = df['label']
 
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
 
     # Make predictions on the test set
-    y_pred = baseline_model_majority_label_predict(df, X_test)
+    # y_pred = baseline_model_majority_label_predict(df, X_test)
+    y_pred = rule_based_model_predict(X_test)
 
     print_metrics(y_test, y_pred)
 
