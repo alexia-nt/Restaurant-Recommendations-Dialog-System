@@ -28,7 +28,7 @@ def create_dataframe(data_file):
 
     return df
 
-def return_majority_label_from_df(df):
+def return_majority_label(df):
     """Returns the most frequent label in the DataFrame.
 
     Args:
@@ -59,7 +59,7 @@ def baseline_model_majority_label_predict(df, X_test):
         y_pred: A list of predicted labels (the majority label).
     """
     y_pred = []
-    majority_label = return_majority_label_from_df(df)
+    majority_label = return_majority_label(df)
     for _ in X_test: # for every utterance in X_test
         y_pred.append(majority_label)
     return y_pred
@@ -75,43 +75,25 @@ def rule_based_get_label(utterance):
     """
 
     # The labels in the dictionary are ordered based on the frequency of the labels in the dataset.
-    # This will prioritize checking the more frequent labels first, which could lead to better performance as well.
+    # This will prioritize checking the more frequent labels first, which could lead to better performance.
 
     rules = {
-        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'find'],
-        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location'],
-        'thankyou': ['thank', 'thanks', 'appreciate it', 'grateful'],
-        'reqalts': ['how about', 'alternative', 'other options', 'alternatives'],
-        'null': ['cough', 'noise', 'laugh', 'uh'],
-        'affirm': ['yes', 'right', 'correct', 'sure', 'absolutely', 'definitely'],
-        'negate': ['no', 'not', 'don\'t', 'nope'],
-        'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later'],
-        'confirm': ['confirm', 'is it', 'check if', 'correct?', 'right?'],
-        'hello': ['hi', 'hello', 'hey', 'greetings'],
-        'repeat': ['repeat', 'say again', 'can you repeat'],
-        'ack': ['okay', 'um', 'uh-huh'],
-        'deny': ['dont want', 'don\'t want', 'reject', 'no', 'not that', 'not this'],
-        'restart': ['restart', 'start over', 'begin again', 'reset'],
-        'reqmore': ['more', 'additional', 'other', 'else'],
+        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
+        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search'],
+        'thankyou': ['thank', 'thanks', 'appreciate', 'grateful', 'thank you', 'many thanks', 'thankful'],
+        'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
+        'null': ['cough', 'noise', 'laugh', 'uh', 'um', 'background', 'incoherent'],
+        'affirm': ['yes', 'yeah', 'right', 'correct', 'sure', 'absolutely', 'definitely', 'of course', 'affirm', 'indeed'],
+        'negate': ['no', 'not', 'don\'t', 'nope', 'none', 'wrong', 'never', 'incorrect'],
+        'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later', 'take care', 'talk to you soon'],
+        'confirm': ['confirm', 'is it', 'check if', 'right?', 'verify', 'am i correct', 'confirming', 'confirmation', 'can you confirm'],
+        'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
+        'repeat': ['repeat', 'again', 'say again', 'can you repeat', 'could you repeat', 'pardon'],
+        'ack': ['okay', 'um', 'uh-huh', 'got it', 'alright', 'fine', 'ok', 'acknowledge'],
+        'deny': ['dont want', 'don\'t want', 'reject', 'not that', 'no thanks', 'not interested', 'decline', 'denying'],
+        'restart': ['restart', 'start over', 'begin again', 'reset', 'new', 'begin anew'],
+        'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further']
     }
-
-    # rules = {
-    #     'inform': ['restaurant', 'food', 'place'],
-    #     'request': ['what is', 'where is', 'can you tell'],
-    #     'thankyou': ['thank', 'thanks'],
-    #     'reqalts': ['how about', 'alternative'],
-    #     'null': ['cough', 'noise'],
-    #     'affirm': ['yes', 'right', 'correct', 'sure'],
-    #     'negate': ['no', 'not'],
-    #     'bye': ['goodbye', 'bye', 'see you'],
-    #     'confirm': ['confirm', 'is it', 'check if'],
-    #     'hello': ['hi', 'hello', 'hey'],
-    #     'repeat': ['repeat', 'say again'],
-    #     'ack': ['okay', 'um', 'uh-huh'],
-    #     'deny': ['dont want', 'reject', "don't want"],
-    #     'restart': ['restart', 'start over'],
-    #     'reqmore': ['more']
-    # }
 
     for label, keywords in rules.items():
         if any(keyword in utterance for keyword in keywords):
