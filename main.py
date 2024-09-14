@@ -48,7 +48,7 @@ def return_majority_label(df):
 
     return majority_label
 
-def baseline_model_majority_label_predict(df, X_test):
+def majority_label_model_predict(df, X_test):
     """Predicts the majority label for all utterances in the test set.
 
     Args:
@@ -106,7 +106,7 @@ def rule_based_model_predict(X_test):
     """Predicts labels for the test set using a rule-based model.
 
     Args:
-        X_test: A list or Pandas Series of test utterances.
+        X_test: A list of test utterances.
 
     Returns:
         y_pred: A list of predicted labels corresponding to the test utterances.
@@ -120,12 +120,12 @@ def print_metrics(y_test, y_pred):
     """Prints classification metrics for a given test set labels and predicted labels.
 
     Args:
-        y_test: The actual labels of the test set.
-        y_pred: The predicted labels for the test set.
+        y_test: A list of the actual labels of the test set.
+        y_pred: A list of the predicted labels for the test set.
     """
 
-    print("\nClassification Report:")
-    print(classification_report(y_test, y_pred))
+    # print("\nClassification Report:")
+    # print(classification_report(y_test, y_pred))
 
     # Calculate and print the evaluation metrics
     accuracy = accuracy_score(y_test, y_pred)
@@ -137,6 +137,31 @@ def print_metrics(y_test, y_pred):
     print("Precision:", precision)
     print("Recall:", recall)
     print("F1-score:", f1)
+
+def print_metrics_for_each_model(df, X_test, y_test):
+    """Prints evaluation metrics for both the majority-label model and the rule-based model.
+
+    Args:
+        df: The DataFrame containing the training data.
+        X_test: A list of test utterances.
+        y_test: A list of the actual labels for the test utterances.
+    """
+    # Make predictions and print metrics for the majority label model
+    print("\nMajority-Label Model - Evaluation Metrics:")
+    y_pred = majority_label_model_predict(df, X_test)
+    print_metrics(y_test, y_pred)
+
+    # Make predictions and print metrics for the rule based model
+    print("\nRule-Based Model - Evaluation Metrics:")
+    y_pred = rule_based_model_predict(X_test)
+    print_metrics(y_test, y_pred)
+
+def print_menu():
+    """Prints the available menu options."""
+    print("\nOptions:")
+    print("1. Print evaluation metrics")
+    print("2. Give an utterance for prediction")
+    print("3. Exit")
 
 def main():
     # Load the data into a DataFrame
@@ -150,25 +175,42 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
 
     # Make predictions on the test set
-    # y_pred = baseline_model_majority_label_predict(df, X_test)
+    # y_pred = majority_label_model_predict(df, X_test)
     y_pred = rule_based_model_predict(X_test)
 
-    print_metrics(y_test, y_pred)
+    # # Print evaluation metrics
+    # print_metrics(y_test, y_pred)
 
-    # interactive prediction
     while True:
-        # Get input from the user
-        user_utterance = input("\nEnter an utterance (or type 'exit' to quit): ").lower()
+        # Display the menu
+        print_menu()
 
-        # Check if the user wants to exit
-        if user_utterance == 'exit':
+        # Get input from the user
+        choice = input("\nEnter your choice (1/2/3): ").strip()
+
+        if choice == '1':
+            # Print evaluation metrics
+            print_metrics_for_each_model(df, X_test, y_test)
+
+        elif choice == '2':
+            while True:
+                # Get input from the user
+                user_utterance = input("\nEnter an utterance (or type '0' to go to menu): ").lower()
+
+                # Check if the user wants to exit
+                if user_utterance == '0':
+                    print("Exiting...")
+                    break
+                predicted_label = rule_based_model_get_label(user_utterance)
+                print(f"Predicted label: {predicted_label}")
+
+        elif choice == '3':
+            # Exit the program
             print("Exiting...")
             break
 
-        # Predict the label using the rule-based model
-        predicted_label = rule_based_model_get_label(user_utterance)
-        # predicted_label = rule_based_model_predict([user_utterance])[0]
-        print(f"Predicted label: {predicted_label}")
+        else:
+            print("Invalid choice. Please select a valid option.")
 
 # Run the main function
 main()
