@@ -1,11 +1,14 @@
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 DATA_FILE = 'data/dialog_acts.dat'
 
 def create_dataframe(data_file):
-    """Creates a Pandas DataFrame from the given data file.
+    """
+    Creates a Pandas DataFrame from the given data file.
 
     Args:
         data_file: The path of the data file.
@@ -29,7 +32,8 @@ def create_dataframe(data_file):
     return df
 
 def return_majority_label(df):
-    """Returns the most frequent label in the DataFrame.
+    """
+    Returns the most frequent label in the DataFrame.
 
     Args:
         df: A Pandas DataFrame with 'label' and 'utterance' columns.
@@ -49,7 +53,8 @@ def return_majority_label(df):
     return majority_label
 
 def majority_label_model_predict(df, X_test):
-    """Predicts the majority label for all utterances in the test set.
+    """
+    Predicts the majority label for all utterances in the test set.
 
     Args:
         df: A Pandas DataFrame containing the training data.
@@ -65,7 +70,8 @@ def majority_label_model_predict(df, X_test):
     return y_pred
 
 def rule_based_model_get_label(utterance):
-    """Predicts the label based on keyword matching rules using a dictionary.
+    """
+    Predicts the label based on keyword matching rules using a dictionary.
 
     Args:
         utterance: The input utterance.
@@ -103,7 +109,8 @@ def rule_based_model_get_label(utterance):
     return 'inform'
 
 def rule_based_model_predict(X_test):
-    """Predicts labels for the test set using a rule-based model.
+    """
+    Predicts labels for the test set using a rule-based model.
 
     Args:
         X_test: A list of test utterances.
@@ -116,16 +123,49 @@ def rule_based_model_predict(X_test):
         y_pred.append(rule_based_model_get_label(utterance))
     return y_pred
 
-def print_metrics(y_test, y_pred):
-    """Prints classification metrics for a given test set labels and predicted labels.
+def save_confusion_matrix(y_test, y_pred, model_name):
+    """
+    Creates and saves a confusion matrix for a given test set labels and
+    predicted labels of a specific model.
 
     Args:
         y_test: A list of the actual labels of the test set.
         y_pred: A list of the predicted labels for the test set.
+        model_name: A string with the name of the model for evaluation.
+    """
+    classes = y_test.unique()
+
+    cm = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+    disp.plot()
+
+    # Add title with the model name
+    plt.title(f"Confusion Matrix - {model_name}")
+
+    # Create the 'figures' directory if it doesn't exist
+    figures_dir = "figures"
+    os.makedirs(figures_dir, exist_ok=True)
+    
+    # Save the plot in the 'figures' directory
+    plot_filename = os.path.join(figures_dir, f"{model_name} Confusion Matrix.png")
+    plt.savefig(plot_filename)
+
+
+def print_metrics(y_test, y_pred, model_name):
+    """
+    Prints classification metrics for a given test set labels and predicted labels
+    of a specific model.
+
+    Args:
+        y_test: A list of the actual labels of the test set.
+        y_pred: A list of the predicted labels for the test set.
+        model_name: A string with the name of the model for evaluation.
     """
 
-    # print("\nClassification Report:")
-    # print(classification_report(y_test, y_pred))
+    print("\nClassification Report:")
+    print(classification_report(y_test, y_pred))
+
+    save_confusion_matrix(y_test, y_pred, model_name)
 
     # Calculate and print the evaluation metrics
     accuracy = accuracy_score(y_test, y_pred)
@@ -149,12 +189,12 @@ def print_metrics_for_each_model(df, X_test, y_test):
     # Make predictions and print metrics for the majority label model
     print("\nMajority-Label Model - Evaluation Metrics:")
     y_pred = majority_label_model_predict(df, X_test)
-    print_metrics(y_test, y_pred)
+    print_metrics(y_test, y_pred, "Majority-Label Model")
 
     # Make predictions and print metrics for the rule based model
     print("\nRule-Based Model - Evaluation Metrics:")
     y_pred = rule_based_model_predict(X_test)
-    print_metrics(y_test, y_pred)
+    print_metrics(y_test, y_pred, "Rule-Based Model")
 
 def print_menu():
     """Prints the available menu options."""
