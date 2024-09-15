@@ -43,7 +43,7 @@ def create_dataframe_no_dup(df):
     df_no_dup = df.drop_duplicates(subset=['utterance'], keep='first')
 
     # write df without dup. to new dat file
-    df_no_dup.to_csv("dialog_acts_no_dup.dat", sep=' ', header=False, index=False, quoting=3, escapechar=' ')
+    df_no_dup.to_csv("data/dialog_acts_no_dup.dat", sep=' ', header=False, index=False, quoting=3, escapechar=' ')
 
     return df_no_dup
 
