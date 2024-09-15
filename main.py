@@ -1,5 +1,8 @@
 import os
 import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
@@ -30,6 +33,19 @@ def create_dataframe(data_file):
     df = pd.DataFrame(data_dict)
 
     return df
+
+def create_dataframe_no_dup(df):
+
+    # remove \n to avoid newlines in no dup file
+    df['utterance'] =  df['utterance'].str.replace('\n', '')
+
+    # drop duplicates from df utterances
+    df_no_dup = df.drop_duplicates(subset=['utterance'], keep='first')
+
+    # write df without dup. to new dat file
+    df_no_dup.to_csv("dialog_acts_no_dup.dat", sep=' ', header=False, index=False, quoting=3, escapechar=' ')
+
+    return df_no_dup
 
 def return_majority_label(df):
     """
@@ -123,6 +139,29 @@ def rule_based_model_predict(X_test):
         y_pred.append(rule_based_model_get_label(utterance))
     return y_pred
 
+def train_DT_LR(X_train, y_train):
+    vectorizer = CountVectorizer()
+    X_bow_train = vectorizer.fit_transform(X_train)
+    # X_bow_test = vectorizer.transform(X_test)
+    
+    # Train Decision-Tree model
+    DT_model = DecisionTreeClassifier()
+    DT_model.fit(X_bow_train, y_train)
+
+    # Train Logistic Regression model
+    LR_model = LogisticRegression(max_iter=400)
+    LR_model.fit(X_bow_train, y_train)
+
+    return DT_model, LR_model, vectorizer
+
+def predict_DT_LR(DT_model, LR_model, vectorizer, X_test):
+
+    X_bow_test = vectorizer.transform(X_test)
+    Y_pred_DT = DT_model.predict(X_bow_test)
+    Y_pred_LR = LR_model.predict(X_bow_test)
+
+    return Y_pred_DT, Y_pred_LR
+
 def save_confusion_matrix(y_test, y_pred, model_name):
     """
     Creates and saves a confusion matrix for a given test set labels and
@@ -167,22 +206,22 @@ def print_metrics(y_test, y_pred, model_name):
     """
 
     print("\nClassification Report:")
-    print(classification_report(y_test, y_pred))
+    print(classification_report(y_test, y_pred, zero_division=0))
 
     save_confusion_matrix(y_test, y_pred, model_name)
 
     # Calculate and print the evaluation metrics
     accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, average='weighted')
-    recall = recall_score(y_test, y_pred, average='weighted')
-    f1 = f1_score(y_test, y_pred, average='weighted')
+    precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+    recall = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+    f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
 
     print("Accuracy:", accuracy)
     print("Precision:", precision)
     print("Recall:", recall)
     print("F1-score:", f1)
 
-def print_metrics_for_each_model(df, X_test, y_test):
+def print_metrics_for_each_model(df, X_test, y_test, y1_pred_DT, y1_pred_LR):
     """
     Prints evaluation metrics for both the majority-label model and the rule-based model.
 
@@ -193,13 +232,21 @@ def print_metrics_for_each_model(df, X_test, y_test):
     """
     # Make predictions and print metrics for the majority label model
     print("\nMajority-Label Model - Evaluation Metrics:")
-    y_pred = majority_label_model_predict(df, X_test)
-    print_metrics(y_test, y_pred, "Majority-Label Model")
+    y_pred_ml = majority_label_model_predict(df, X_test)
+    print_metrics(y_test, y_pred_ml, "Majority-Label Model")
 
     # Make predictions and print metrics for the rule based model
     print("\nRule-Based Model - Evaluation Metrics:")
-    y_pred = rule_based_model_predict(X_test)
-    print_metrics(y_test, y_pred, "Rule-Based Model")
+    y_pred_rb = rule_based_model_predict(X_test)
+    print_metrics(y_test, y_pred_rb, "Rule-Based Model")
+
+    print("\nDecision-Tree model - Evaluation Metrics:")
+    print("\nOriginal data:")
+    print_metrics(y_test, y1_pred_DT, "DT-model original data")
+
+    print("\nLogistic-Regression model - Evaluation Metrics:")
+    print("\nOriginal data:")
+    print_metrics(y_test, y1_pred_LR, "LR-model original data")
 
 def print_menu():
     """Prints the available menu options."""
@@ -212,19 +259,23 @@ def main():
     # Load the data into a DataFrame
     df = create_dataframe(DATA_FILE)
 
+    # Create dataframe without duplicates
+    df_no_dup = create_dataframe_no_dup(df)
+
     # Split the data into features (utterances) and labels
-    X = df['utterance']
-    y = df['label']
+    X_1 = df['utterance']
+    y_1 = df['label']
+    X_2 = df_no_dup['utterance']
+    y_2 = df_no_dup['label']
 
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
+    X1_train, X1_test, y1_train, y1_test = train_test_split(X_1, y_1, test_size=0.15, random_state=42)
+    X2_train, X2_test, y2_train, y2_test = train_test_split(X_2, y_2, test_size=0.15, random_state=42)
 
-    # Make predictions on the test set
-    # y_pred = majority_label_model_predict(df, X_test)
-    y_pred = rule_based_model_predict(X_test)
-
-    # # Print evaluation metrics
-    # print_metrics(y_test, y_pred)
+    # Make predictions on original/no dup test set for DT 
+    DT_model, LR_model, vectorizer = train_DT_LR(X1_train, y1_train)
+    y1_pred_DT, y1_pred_LR = predict_DT_LR(DT_model, LR_model, vectorizer, X1_test)
+   
 
     while True:
         # Display the menu
@@ -235,7 +286,7 @@ def main():
 
         if choice == '1':
             # Print evaluation metrics
-            print_metrics_for_each_model(df, X_test, y_test)
+            print_metrics_for_each_model(df, X1_test, y1_test, y1_pred_DT, y1_pred_LR)
 
         elif choice == '2':
             while True:
