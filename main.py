@@ -282,8 +282,8 @@ def main():
     y1_pred_DT, y1_pred_LR = predict_DT_LR(DT_model, LR_model, vectorizer, X1_test)
 
     # Make predictions on no dup test set for DT and LR
-    DT_model, LR_model, vectorizer = train_DT_LR(X2_train, y2_train)
-    y2_pred_DT, y2_pred_LR = predict_DT_LR(DT_model, LR_model, vectorizer, X2_test)
+    DT_model_no_dup, LR_model_no_dup, vectorizer_no_dup = train_DT_LR(X2_train, y2_train)
+    y2_pred_DT, y2_pred_LR = predict_DT_LR(DT_model_no_dup, LR_model_no_dup, vectorizer_no_dup, X2_test)
    
 
     while True:
