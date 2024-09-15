@@ -133,10 +133,10 @@ def save_confusion_matrix(y_test, y_pred, model_name):
         y_pred: A list of the predicted labels for the test set.
         model_name: A string with the name of the model for evaluation.
     """
-    classes = y_test.unique()
+    labels = ["ack", "affirm", "bye", "confirm", "deny", "hello", "inform", "negate", "null", "repeat", "reqalts", "require", "request", "restart", "thankyou"]
 
     cm = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
     disp.plot()
 
     # Add title with the model name
@@ -179,7 +179,8 @@ def print_metrics(y_test, y_pred, model_name):
     print("F1-score:", f1)
 
 def print_metrics_for_each_model(df, X_test, y_test):
-    """Prints evaluation metrics for both the majority-label model and the rule-based model.
+    """
+    Prints evaluation metrics for both the majority-label model and the rule-based model.
 
     Args:
         df: The DataFrame containing the training data.
