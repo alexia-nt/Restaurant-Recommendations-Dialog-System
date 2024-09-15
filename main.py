@@ -137,10 +137,14 @@ def save_confusion_matrix(y_test, y_pred, model_name):
 
     cm = confusion_matrix(y_test, y_pred)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
-    disp.plot()
+    # disp.plot()
+    disp.plot(xticks_rotation=45)  # Rotate x-axis labels by 45 degrees
 
     # Add title with the model name
     plt.title(f"Confusion Matrix - {model_name}")
+
+    # Adjust layout to prevent labels from being cut off
+    plt.tight_layout()
 
     # Create the 'figures' directory if it doesn't exist
     figures_dir = "figures"
