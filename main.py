@@ -176,10 +176,8 @@ def save_confusion_matrix(y_test, y_pred, model_name):
 
     cm = confusion_matrix(y_test, y_pred)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
-
-    # Create figure and axes
-    fig, ax = plt.subplots(figsize=(8, 6))  # Adjust size as needed
-    disp.plot(ax=ax, xticks_rotation=45)  # Rotate x-axis labels by 45 degrees
+    # disp.plot()
+    disp.plot(xticks_rotation=45)  # Rotate x-axis labels by 45 degrees
 
     # Add title with the model name
     plt.title(f"Confusion Matrix - {model_name}")
@@ -210,7 +208,7 @@ def print_metrics(y_test, y_pred, model_name):
     print("\nClassification Report:")
     print(classification_report(y_test, y_pred, zero_division=0))
 
-    save_confusion_matrix(y_test, y_pred, model_name)
+    # save_confusion_matrix(y_test, y_pred, model_name)
 
     # Calculate and print the evaluation metrics
     accuracy = accuracy_score(y_test, y_pred)
@@ -223,7 +221,7 @@ def print_metrics(y_test, y_pred, model_name):
     print("Recall:", recall)
     print("F1-score:", f1)
 
-def print_metrics_for_each_model(df, X_test, y_test, y1_pred_DT, y1_pred_LR):
+def print_metrics_for_each_model(df, X1_test, y1_test, y2_test, y1_pred_DT, y1_pred_LR, y2_pred_DT, y2_pred_LR):
     """
     Prints evaluation metrics for both the majority-label model and the rule-based model.
 
@@ -234,21 +232,26 @@ def print_metrics_for_each_model(df, X_test, y_test, y1_pred_DT, y1_pred_LR):
     """
     # Make predictions and print metrics for the majority label model
     print("\nMajority-Label Model - Evaluation Metrics:")
-    y_pred_ml = majority_label_model_predict(df, X_test)
-    print_metrics(y_test, y_pred_ml, "Majority-Label Model")
+    y_pred_ml = majority_label_model_predict(df, X1_test)
+    print_metrics(y1_test, y_pred_ml, "Majority-Label Model")
 
     # Make predictions and print metrics for the rule based model
     print("\nRule-Based Model - Evaluation Metrics:")
-    y_pred_rb = rule_based_model_predict(X_test)
-    print_metrics(y_test, y_pred_rb, "Rule-Based Model")
+    y_pred_rb = rule_based_model_predict(X1_test)
+    print_metrics(y1_test, y_pred_rb, "Rule-Based Model")
 
     print("\nDecision-Tree model - Evaluation Metrics:")
     print("\nOriginal data:")
-    print_metrics(y_test, y1_pred_DT, "DT-model original data")
+    print_metrics(y1_test, y1_pred_DT, "DT-model original data")
+    print("\nData without duplications:")
+    print_metrics(y2_test, y2_pred_DT, "DT-model no-dup data")
 
     print("\nLogistic-Regression model - Evaluation Metrics:")
     print("\nOriginal data:")
-    print_metrics(y_test, y1_pred_LR, "LR-model original data")
+    print_metrics(y1_test, y1_pred_LR, "LR-model original data")
+    print("\nData without duplications:")
+    print_metrics(y2_test, y2_pred_LR, "LR-model no-dup data")
+
 
 def print_menu():
     """Prints the available menu options."""
@@ -274,9 +277,13 @@ def main():
     X1_train, X1_test, y1_train, y1_test = train_test_split(X_1, y_1, test_size=0.15, random_state=42)
     X2_train, X2_test, y2_train, y2_test = train_test_split(X_2, y_2, test_size=0.15, random_state=42)
 
-    # Make predictions on original/no dup test set for DT 
+    # Make predictions on original data for DT and LR
     DT_model, LR_model, vectorizer = train_DT_LR(X1_train, y1_train)
     y1_pred_DT, y1_pred_LR = predict_DT_LR(DT_model, LR_model, vectorizer, X1_test)
+
+    # Make predictions on no dup test set for DT and LR
+    DT_model, LR_model, vectorizer = train_DT_LR(X2_train, y2_train)
+    y2_pred_DT, y2_pred_LR = predict_DT_LR(DT_model, LR_model, vectorizer, X2_test)
    
 
     while True:
@@ -288,7 +295,8 @@ def main():
 
         if choice == '1':
             # Print evaluation metrics
-            print_metrics_for_each_model(df, X1_test, y1_test, y1_pred_DT, y1_pred_LR)
+            print_metrics_for_each_model(df, X1_test, y1_test, y2_test, y1_pred_DT, y1_pred_LR, y2_pred_DT, y2_pred_LR)
+
 
         elif choice == '2':
             while True:
@@ -299,8 +307,17 @@ def main():
                 if user_utterance == '0':
                     print("Exiting...")
                     break
-                predicted_label = rule_based_model_get_label(user_utterance)
-                print(f"Predicted label: {predicted_label}")
+
+                user_utterance_vec = vectorizer.transform([user_utterance])
+
+                # Predict labels using DT and LR models
+                y_pred_DT = DT_model.predict(user_utterance_vec)[0]
+                y_pred_LR = LR_model.predict(user_utterance_vec)[0]
+
+                # Print predicted labels
+                print(f"Predicted Label (Decision Tree): {y_pred_DT}")
+                print(f"Predicted Label (Logistic Regression): {y_pred_LR}")
+                
 
         elif choice == '3':
             # Exit the program
