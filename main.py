@@ -172,7 +172,10 @@ def save_confusion_matrix(y_test, y_pred, model_name):
         y_pred: A list of the predicted labels for the test set.
         model_name: A string with the name of the model for evaluation.
     """
-    labels = ["ack", "affirm", "bye", "confirm", "deny", "hello", "inform", "negate", "null", "repeat", "reqalts", "require", "request", "restart", "thankyou"]
+    # labels = ["ack", "affirm", "bye", "confirm", "deny", "hello", "inform", "negate", "null", "repeat", "reqalts", "require", "request", "restart", "thankyou"]
+    
+    # Get the unique labels from the test set and sort to keep labels in the correct order
+    labels = sorted(list(set(y_test)))
 
     cm = confusion_matrix(y_test, y_pred)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
@@ -208,7 +211,7 @@ def print_metrics(y_test, y_pred, model_name):
     print("\nClassification Report:")
     print(classification_report(y_test, y_pred, zero_division=0))
 
-    # save_confusion_matrix(y_test, y_pred, model_name)
+    save_confusion_matrix(y_test, y_pred, model_name)
 
     # Calculate and print the evaluation metrics
     accuracy = accuracy_score(y_test, y_pred)
@@ -231,14 +234,14 @@ def print_metrics_for_each_model(df, X1_test, y1_test, y2_test, y1_pred_DT, y1_p
         y_test: A list of the actual labels for the test utterances.
     """
     # Make predictions and print metrics for the majority label model
-    print("\nMajority-Label Model - Evaluation Metrics:")
-    y_pred_ml = majority_label_model_predict(df, X1_test)
-    print_metrics(y1_test, y_pred_ml, "Majority-Label Model")
+    # print("\nMajority-Label Model - Evaluation Metrics:")
+    # y_pred_ml = majority_label_model_predict(df, X1_test)
+    # print_metrics(y1_test, y_pred_ml, "Majority-Label Model")
 
-    # Make predictions and print metrics for the rule based model
-    print("\nRule-Based Model - Evaluation Metrics:")
-    y_pred_rb = rule_based_model_predict(X1_test)
-    print_metrics(y1_test, y_pred_rb, "Rule-Based Model")
+    # # Make predictions and print metrics for the rule based model
+    # print("\nRule-Based Model - Evaluation Metrics:")
+    # y_pred_rb = rule_based_model_predict(X1_test)
+    # print_metrics(y1_test, y_pred_rb, "Rule-Based Model")
 
     print("\nDecision-Tree model - Evaluation Metrics:")
     print("\nOriginal data:")
