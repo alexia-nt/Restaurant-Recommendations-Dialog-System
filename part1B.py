@@ -76,7 +76,7 @@ def extract_preferences(utterance,keywords):
 
     return None
 
-def get_matching_restaurants(food_type, area, price_range):
+def get_matching_restaurants(food_preference, price_preference, area_preference):
     """Returns a list of restaurants based on the given preferences.
 
     Args:
@@ -93,14 +93,14 @@ def get_matching_restaurants(food_type, area, price_range):
     filtered_df = pd.read_csv("data/restaurant_info.csv")
     
     # Filter restaurants based on preferences
-    if food_type != "any":
-        filtered_df = filtered_df[filtered_df['food'] == food_type]
+    if food_preference != "any":
+        filtered_df = filtered_df[filtered_df["food"] == food_preference]
+
+    if price_preference != "any":
+        filtered_df = filtered_df[filtered_df["pricerange"] == price_preference]
     
-    if area != "any":
-        filtered_df = filtered_df[filtered_df['area'] == area]
-    
-    if price_range != "any":
-        filtered_df = filtered_df[filtered_df['pricerange'] == price_range]
+    if area_preference != "any":
+        filtered_df = filtered_df[filtered_df["area"] == area_preference]
 
     if not filtered_df.empty:
         restaurants = filtered_df.to_dict(orient='records')
