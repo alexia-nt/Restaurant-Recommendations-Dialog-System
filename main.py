@@ -6,6 +6,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
+import pickle
 
 DATA_FILE = 'data/dialog_acts.dat'
 
@@ -151,6 +152,20 @@ def train_DT_LR(X_train, y_train):
     # Train Logistic Regression model
     LR_model = LogisticRegression(max_iter=400)
     LR_model.fit(X_bow_train, y_train)
+
+    # Create the 'models' directory if it doesn't exist
+    models_dir = "models"
+    os.makedirs(models_dir, exist_ok=True)
+
+    # Save the models and vectorizer in the 'models' directory
+    with open(os.path.join(models_dir, 'dt_model.pkl'), 'wb') as f:
+        pickle.dump(DT_model, f)
+
+    with open(os.path.join(models_dir, 'lr_model.pkl'), 'wb') as f:
+        pickle.dump(LR_model, f)
+
+    with open(os.path.join(models_dir, 'vectorizer.pkl'), 'wb') as f:
+        pickle.dump(vectorizer, f)
 
     return DT_model, LR_model, vectorizer
 
