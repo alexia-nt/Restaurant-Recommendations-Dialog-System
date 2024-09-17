@@ -42,7 +42,7 @@ def extract_initial_preferences(utterance, keywords, preference_type):
     for word in utterance_words:
         for keyword in keywords:
             distance = Levenshtein.distance(word.lower(), keyword.lower())
-            if distance <= 2:  # Adjust threshold as needed
+            if distance <= 1:  # Adjust threshold as needed
                 return keyword
 
     return None
