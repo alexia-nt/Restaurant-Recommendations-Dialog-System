@@ -1,243 +1,200 @@
 import pandas as pd
 import Levenshtein
-import pickle
 
-DT_FILE = "models/dt_model.pkl"
-LR_FILE = "models/lr_model.pkl"
-VECTORIZER_FILE = "models/vectorizer.pkl"
+class RestaurantRecommendationSystem:
+    DATA_FILE = "data/restaurant_info.csv"
+    DT_FILE = "models/dt_model.pkl"
+    LR_FILE = "models/lr_model.pkl"
+    VECTORIZER_FILE = "models/vectorizer.pkl"
 
-WELCOME_STATE = 1
-ASK_INITIAL_PREFERENCES_STATE = 2
-ASK_FOOD_STATE = 3
-ASK_PRICE_STATE = 4
-ASK_AREA_STATE = 5
-RECOMMEND_STATE = 6
-END_STATE = 7
+    WELCOME_STATE = 1
+    ASK_INITIAL_PREFERENCES_STATE = 2
+    ASK_FOOD_STATE = 3
+    ASK_PRICE_STATE = 4
+    ASK_AREA_STATE = 5
+    RECOMMEND_STATE = 6
+    END_STATE = 7
 
-DONT_CARE_KEYWORDS = ["do not care", "don't care", "dont care",
-                      "do not mind", "don't mind", "dont mind",
-                      "does not matter", "doesn't matter", "doesnt matter",
-                      "any", "anywhere", "whatever"]
+    DONT_CARE_KEYWORDS = [
+        "do not care", "don't care", "dont care",
+        "do not mind", "don't mind", "dont mind",
+        "does not matter", "doesn't matter", "doesnt matter",
+        "any", "anywhere", "whatever"
+    ]
 
-def get_keywords(df):
-    food_keywords = list(df["food"].dropna().astype(str).unique())
-    price_keywords = list(df["pricerange"].dropna().astype(str).unique())
-    area_keywords = list(df["area"].dropna().astype(str).unique())
-    return food_keywords, price_keywords, area_keywords
+    def __init__(self):
+        self.df = pd.read_csv(self.DATA_FILE)
+        self.food_keywords, self.price_keywords, self.area_keywords = self.get_keywords()
+        self.state = self.WELCOME_STATE
+        self.user_input = ""
+        self.food_preference = None
+        self.price_preference = None
+        self.area_preference = None
 
-def extract_initial_preferences(utterance, keywords, preference_type):
+    def get_keywords(self):
+        food_keywords = list(self.df["food"].dropna().astype(str).unique())
+        price_keywords = list(self.df["pricerange"].dropna().astype(str).unique())
+        area_keywords = list(self.df["area"].dropna().astype(str).unique())
+        return food_keywords, price_keywords, area_keywords
 
-    # Rule to check for "any" + preference_type
-    if f"any {preference_type}" in utterance:
-        return "any"
-
-    for keyword in keywords:
-        if keyword in utterance:
-            return keyword
-
-    # Split the utterance into words for checking
-    utterance_words = utterance.lower().split()
-
-    # Check for close matches using Levenshtein distance
-    for word in utterance_words:
-        for keyword in keywords:
-            distance = Levenshtein.distance(word.lower(), keyword.lower())
-            if distance <= 1:  # Adjust threshold as needed
-                return keyword
-
-    return None
-
-def extract_preferences(utterance,keywords):
-    """Extracts a preference from the utterance.
-
-    Args:
-        utterance: The input utterance.
-
-    Returns:
-        preference: The extracted preference (or None if not found).
-    """
-    for keyword in DONT_CARE_KEYWORDS:
-        if keyword in utterance:
+    def extract_initial_preferences(self, utterance, keywords, preference_type):
+        if f"any {preference_type}" in utterance:
             return "any"
-
-    for keyword in keywords:
-        if keyword in utterance:
-            return keyword
-    
-    # Split the utterance into words for checking
-    utterance_words = utterance.lower().split()
-
-    # Check for close matches using Levenshtein distance
-    for word in utterance_words:
+        
         for keyword in keywords:
-            distance = Levenshtein.distance(word.lower(), keyword.lower())
-            if distance <= 2:  # Adjust threshold as needed
+            if keyword in utterance:
                 return keyword
+        
+        utterance_words = utterance.lower().split()
+        
+        for word in utterance_words:
+            for keyword in keywords:
+                distance = Levenshtein.distance(word.lower(), keyword.lower())
+                if distance <= 1:  # Adjust threshold as needed
+                    return keyword
+        return None
 
-    return None
+    def extract_preferences(self, utterance, keywords):
+        for keyword in self.DONT_CARE_KEYWORDS:
+            if keyword in utterance:
+                return "any"
+        
+        for keyword in keywords:
+            if keyword in utterance:
+                return keyword
+        
+        utterance_words = utterance.lower().split()
+        
+        for word in utterance_words:
+            for keyword in keywords:
+                distance = Levenshtein.distance(word.lower(), keyword.lower())
+                if distance <= 1:  # Adjust threshold as needed
+                    return keyword
+        return None
 
-def get_matching_restaurants(food_preference, price_preference, area_preference):
-    """Returns a list of restaurants based on the given preferences.
+    def get_matching_restaurants(self):
+        filtered_df = self.df.copy()
 
-    Args:
-        df: A Pandas DataFrame containing restaurant information.
-        food_type: The desired food type.
-        area: The desired area.
-        price_range: The desired price range.
+        if self.food_preference != "any":
+            filtered_df = filtered_df[filtered_df["food"] == self.food_preference]
+        
+        if self.price_preference != "any":
+            filtered_df = filtered_df[filtered_df["pricerange"] == self.price_preference]
+        
+        if self.area_preference != "any":
+            filtered_df = filtered_df[filtered_df["area"] == self.area_preference]
 
-    Returns:
-        restaurants: A list of dictionaries representing the recommended restaurant, or None if no suitable restaurant is found.
-    """
+        if not filtered_df.empty:
+            restaurants = filtered_df.to_dict(orient='records')
+            return restaurants
+        else:
+            return []
 
-    # Make a copy of the DataFrame to avoid modifying the original
-    filtered_df = pd.read_csv("data/restaurant_info.csv")
-    
-    # Filter restaurants based on preferences
-    if food_preference != "any":
-        filtered_df = filtered_df[filtered_df["food"] == food_preference]
+    # ------------------------ State Handlers ------------------------
 
-    if price_preference != "any":
-        filtered_df = filtered_df[filtered_df["pricerange"] == price_preference]
-    
-    if area_preference != "any":
-        filtered_df = filtered_df[filtered_df["area"] == area_preference]
+    def welcome_state_handler(self):
+        print("Hello, welcome to the restaurant recommendations dialogue system! You can ask for restaurants by area, price range, or food type.")
+        self.user_input = input(">>").lower()
+        return
 
-    if not filtered_df.empty:
-        restaurants = filtered_df.to_dict(orient='records')
-        return restaurants
-    else:
-        return []
-    
-# ------------------------------------------ STATE HANDLERS ------------------------------------------
+    def ask_initial_preferences_handler(self):
+        self.food_preference = self.extract_initial_preferences(self.user_input, self.food_keywords, "food")
+        self.price_preference = self.extract_initial_preferences(self.user_input, self.price_keywords, "price")
+        self.area_preference = self.extract_initial_preferences(self.user_input, self.area_keywords, "area")
 
-def welcome_state_handler():
-    print("Hello, welcome to the restaurant recommdendations dialogue system! You can ask for restaurants by area, price range or food type.")
-    user_input = input(">>").lower()
-    # check if user input is inform
-    return user_input
+        if self.food_preference is None:
+            return self.ASK_FOOD_STATE
+        
+        if self.price_preference is None:
+            return self.ASK_PRICE_STATE
+        
+        if self.area_preference is None:
+            return self.ASK_AREA_STATE
 
-def ask_initial_preferences_handler(user_input, food_keywords, price_keywords, area_keywords):
-    food_preference = extract_initial_preferences(user_input, food_keywords, "food")
-    price_preference = extract_initial_preferences(user_input, price_keywords, "price")
-    area_preference = extract_initial_preferences(user_input, area_keywords, "area")
+        return self.RECOMMEND_STATE
 
-    print("Extracted food preference: ", food_preference)
-    print("Extracted price preference: ", price_preference)
-    print("Extracted area preference: ", area_preference)
+    def ask_food_handler(self):
+        if self.food_preference is not None:
+            return
 
-    if food_preference == None:
-        return ASK_FOOD_STATE, user_input, food_preference, price_preference, area_preference
-    
-    if price_preference == None:
-        return ASK_PRICE_STATE, user_input, food_preference, price_preference, area_preference
-    
-    if area_preference == None:
-        return ASK_AREA_STATE, user_input, food_preference, price_preference, area_preference
-    
-    return RECOMMEND_STATE, user_input, food_preference, price_preference, area_preference
+        while self.food_preference is None:
+            print("What kind of food would you like?")
+            self.user_input = input(">>").lower()
+            self.food_preference = self.extract_preferences(self.user_input, self.food_keywords)
 
-def ask_food_handler(user_input, food_keywords, food_preference):
-    # keep the food preference from initial preferences
-    if food_preference != None:
-        return user_input, food_preference
-    
-    while food_preference == None:
-        print("What kind of food would you like?")
-        user_input = input(">>").lower()
-        food_preference = extract_preferences(user_input, food_keywords)
+        return
 
-    print("Extracted food preference: ", food_preference)
+    def ask_price_handler(self):
+        if self.price_preference is not None:
+            return
 
-    return user_input, food_preference
+        while self.price_preference is None:
+            print("What price range do you want?")
+            self.user_input = input(">>").lower()
+            self.price_preference = self.extract_preferences(self.user_input, self.price_keywords)
 
-def ask_price_handler(user_input, price_keywords, price_preference):
-    # keep the price preference from initial preferences
-    if price_preference != None:
-        return user_input, price_preference
-    
-    while price_preference == None:
-        print("What price range do you want?")
-        user_input = input(">>").lower()
-        price_preference = extract_preferences(user_input, price_keywords)
+        return
 
-    print("Extracted price preference: ", price_preference)
+    def ask_area_handler(self):
+        if self.area_preference is not None:
+            return
 
-    return user_input, price_preference
+        while self.area_preference is None:
+            print("What part of town do you have in mind?")
+            self.user_input = input(">>").lower()
+            self.area_preference = self.extract_preferences(self.user_input, self.area_keywords)
 
-def ask_area_handler(user_input, area_keywords, area_preference):
-    # keep the area preference from initial preferences
-    if area_preference != None:
-        return user_input, area_preference
-    
-    while area_preference == None:
-        print("What part of town do you have in mind?")
-        user_input = input(">>").lower()
-        area_preference = extract_preferences(user_input, area_keywords)
+        return
 
-    print("Extracted area preference: ", area_preference)
-    
-    return user_input, area_preference
+    def recommend_handler(self):
+        matching_restaurants = self.get_matching_restaurants()
+        print(f"Found {len(matching_restaurants)} restaurants based on your preferences.")
+        for restaurant in matching_restaurants:
+            print(restaurant)
 
-def recommend_handler(food_preference, price_preference, area_preference):
-    matching_restaurants = get_matching_restaurants(food_preference, price_preference, area_preference)
-    print("Found ", len(matching_restaurants), " restaurants based on your preferences.")
-    for restaurant in matching_restaurants:
-        print(restaurant)
-    return
+    # ------------------------ State Transition ------------------------
 
-def handle_transition(state, user_input, food_keywords, price_keywords, area_keywords, food_preference, price_preference, area_preference):
-    if state == WELCOME_STATE:
-        user_input= welcome_state_handler()
-        return ASK_INITIAL_PREFERENCES_STATE, user_input, food_preference, price_preference, area_preference
-    
-    elif state == ASK_INITIAL_PREFERENCES_STATE:
-        state, user_input, food_preference, price_preference, area_preference = ask_initial_preferences_handler(user_input, food_keywords, price_keywords, area_keywords)
-        return state, user_input, food_preference, price_preference, area_preference
-    
-    elif state == ASK_FOOD_STATE:
-        user_input, food_preference = ask_food_handler(user_input, food_keywords, food_preference)
-        return ASK_PRICE_STATE, user_input, food_preference, price_preference, area_preference
-    
-    elif state == ASK_PRICE_STATE:
-        user_input, price_preference  = ask_price_handler(user_input, price_keywords, price_preference)
-        return ASK_AREA_STATE, user_input, food_preference, price_preference, area_preference
-    
-    elif state == ASK_AREA_STATE:
-        user_input, area_preference  = ask_area_handler(user_input, area_keywords, area_preference)
-        return RECOMMEND_STATE, user_input, food_preference, price_preference, area_preference
-    
-    elif state == RECOMMEND_STATE:
-        recommend_handler(food_preference, price_preference, area_preference)
-        return END_STATE, user_input, food_preference, price_preference, area_preference
-    
-    else:
-        return END_STATE, user_input, food_preference, price_preference, area_preference
+    def handle_transition(self):
+        if self.state == self.WELCOME_STATE:
+            self.welcome_state_handler()
+            self.state = self.ASK_INITIAL_PREFERENCES_STATE
+            return
 
-def main():
-    # Load the restaurant data
-    df = pd.read_csv("data/restaurant_info.csv")
+        elif self.state == self.ASK_INITIAL_PREFERENCES_STATE:
+            self.state = self.ask_initial_preferences_handler()
+            return
 
-    state = WELCOME_STATE
-    food_keywords, price_keywords, area_keywords = get_keywords(df)
+        elif self.state == self.ASK_FOOD_STATE:
+            self.ask_food_handler()
+            self.state = self.ASK_PRICE_STATE
+            return
 
-    print(food_keywords)
-    print(price_keywords)
-    print(area_keywords)
+        elif self.state == self.ASK_PRICE_STATE:
+            self.ask_price_handler()
+            self.state = self.ASK_AREA_STATE
+            return
 
-    user_input = ""
-    food_preference = None
-    price_preference = None
-    area_preference = None
+        elif self.state == self.ASK_AREA_STATE:
+            self.ask_area_handler()
+            self.state = self.RECOMMEND_STATE
+            return
 
-    while state != END_STATE:
-        # Handle state transitions
-        state, user_input, food_preference, price_preference, area_preference = handle_transition(state, user_input,
-                                                                                                  food_keywords, price_keywords, area_keywords,
-                                                                                                  food_preference, price_preference, area_preference)
-        print("State: ", state)
-        print("User input: ", user_input)
-        print("food_type: ", food_preference)
-        print("price_range: ", price_preference)
-        print("area: ", area_preference)
+        elif self.state == self.RECOMMEND_STATE:
+            self.recommend_handler()
+            self.state = self.END_STATE
+            return
 
-main()
+    def run(self):
+        while self.state != self.END_STATE:
+            self.handle_transition()
+
+            print("State: ", self.state)
+            print("User input: ", self.user_input)
+            print("food_type: ", self.food_preference)
+            print("price_range: ", self.price_preference)
+            print("area: ", self.area_preference)
+
+# Create an instance and run the system
+if __name__ == "__main__":
+    system = RestaurantRecommendationSystem()
+    system.run()
