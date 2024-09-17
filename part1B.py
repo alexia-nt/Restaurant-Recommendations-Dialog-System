@@ -110,11 +110,11 @@ def get_matching_restaurants(food_type, area, price_range):
     
 # ------------------------------------------ STATE HANDLERS ------------------------------------------
 
-def welcome_state_handler(food_preference, price_preference, area_preference):
+def welcome_state_handler():
     print("Hello, welcome to the restaurant recommdendations dialogue system! You can ask for restaurants by area, price range or food type.")
     user_input = input(">>").lower()
-    # check if user input if inform
-    return ASK_INITIAL_PREFERENCES_STATE, user_input, food_preference, price_preference, area_preference
+    # check if user input is inform
+    return user_input
 
 def ask_initial_preferences_handler(user_input, food_keywords, price_keywords, area_keywords):
     food_preference = extract_initial_preferences(user_input, food_keywords, "food")
@@ -187,8 +187,8 @@ def recommend_handler(food_preference, price_preference, area_preference):
 
 def handle_transition(state, user_input, food_keywords, price_keywords, area_keywords, food_preference, price_preference, area_preference):
     if state == WELCOME_STATE:
-        state, user_input, food_preference, price_preference, area_preference = welcome_state_handler(food_preference, price_preference, area_preference)
-        return state, user_input, food_preference, price_preference, area_preference
+        user_input= welcome_state_handler()
+        return ASK_INITIAL_PREFERENCES_STATE, user_input, food_preference, price_preference, area_preference
     
     elif state == ASK_INITIAL_PREFERENCES_STATE:
         state, user_input, food_preference, price_preference, area_preference = ask_initial_preferences_handler(user_input, food_keywords, price_keywords, area_keywords)
