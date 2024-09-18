@@ -172,7 +172,7 @@ class RestaurantRecommendationSystem:
 
     def recommend_handler(self):
         restaurants = self.get_matching_restaurants()
-        if {len(restaurants)} == 0:
+        if (len(restaurants)) == 0:
             print(f"I found no restaurant based on your preferences. Do you want something else?")
             self.user_input = input(">>").lower()
             dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
@@ -257,13 +257,16 @@ class RestaurantRecommendationSystem:
         elif self.state == self.RECOMMEND_STATE:
             self.state = self.END_STATE
             self.recommend_handler()
+            return
 
         elif self.state == self.RECOMMEND_MORE_STATE:
             self.state = self.END_STATE
             self.recommend_more_handler()
+            return
 
         elif self.state == self.GIVE_DETAILS_STATE:
             self.give_details_handler()
+            return
             
 
 
