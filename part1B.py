@@ -35,6 +35,9 @@ class RestaurantRecommendationSystem:
 
         # Extract keywords for preferences
         self.food_keywords, self.price_keywords, self.area_keywords = self.get_keywords()
+        # Add "center" in area keywords, so it is also included in the
+        # area_keywords list and not only the "centre" area keyword
+        self.area_keywords.append("center")
 
         # Initialize state
         self.state = self.WELCOME_STATE
@@ -71,6 +74,10 @@ class RestaurantRecommendationSystem:
         utterance_words = utterance.lower().split()
         
         for word in utterance_words:
+            # If the word from user utterance is "want", do not check levenshtein distance,
+            # because it would be matched as "west" area preference for threshold >=2
+            if word == "want":
+                continue 
             for keyword in keywords:
                 distance = Levenshtein.distance(word.lower(), keyword.lower())
                 if distance <= self.levenshtein_threshold:  # Adjust threshold as needed
@@ -142,44 +149,56 @@ class RestaurantRecommendationSystem:
         if self.food_preference is not None:
             return
 
+        print("What kind of food would you like?")
         while self.food_preference is None:
-            print("What kind of food would you like?")
             self.user_input = input(">>").lower()
+
             dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
             print(f"Dialog act: {dialog_act}")
+
             self.food_preference = self.extract_preferences(self.user_input, self.food_keywords)
 
+            if self.food_preference is None:
+                print("Please give a valid food preference.")
         return
 
     def ask_price_handler(self):
         if self.price_preference is not None:
             return
 
+        print("What price range do you want?")
         while self.price_preference is None:
-            print("What price range do you want?")
             self.user_input = input(">>").lower()
+
             dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
             print(f"Dialog act: {dialog_act}")
+
             self.price_preference = self.extract_preferences(self.user_input, self.price_keywords)
 
+            if self.price_preference is None:
+                print("Please give a valid price preference.")
         return
 
     def ask_area_handler(self):
         if self.area_preference is not None:
             return
 
+        print("What part of town do you have in mind?")
         while self.area_preference is None:
-            print("What part of town do you have in mind?")
             self.user_input = input(">>").lower()
+
             dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
             print(f"Dialog act: {dialog_act}")
+
             self.area_preference = self.extract_preferences(self.user_input, self.area_keywords)
 
+            if self.area_preference is None:
+                print("Please give a valid area preference.")
         return
 
     def recommend_handler(self):
         # Grounding
-        print(f"Ok, I am searching for a {self.price_preference}ly priced {self.food_preference} restaurant in the {self.area_preference}...")
+        print(f"Ok, I am searching for a restaurant based on the following preferences: {self.food_preference} restaurant at a {self.price_preference} price in the {self.area_preference} area...")
         
         self.possible_restaurants = self.get_matching_restaurants()
 
