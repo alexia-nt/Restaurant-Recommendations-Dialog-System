@@ -20,7 +20,7 @@ class RestaurantRecommendationSystem:
     ASK_PRICE_STATE = 4
     ASK_AREA_STATE = 5
     RECOMMEND_STATE = 6
-    NO_MORE_RESTAURANTS_STATE = 7
+    NO_MORE_RECOMMENDATIONS_STATE = 7
     GIVE_DETAILS_STATE = 8
     RECOMMEND_MORE_STATE = 9
     END_STATE = 10
@@ -198,7 +198,7 @@ class RestaurantRecommendationSystem:
             else:
                 return self.RECOMMEND_MORE_STATE
             
-    def no_more_restaurants_handler(self):
+    def no_more_recommendation_handler(self):
         return
                         
     def recommend_more_handler(self):
@@ -216,7 +216,7 @@ class RestaurantRecommendationSystem:
                 return self.RECOMMEND_MORE_STATE
             else:
                 print("There are no other restaurants for your preferences.")
-                return self.NO_MORE_RESTAURANTS_STATE
+                return self.NO_MORE_RECOMMENDATIONS_STATE
         elif dialog_act == "request":
             self.state = self.GIVE_DETAILS_STATE
         else:
@@ -263,8 +263,8 @@ class RestaurantRecommendationSystem:
             self.state = self.recommend_handler()
             return 
         
-        elif self.state == self.NO_MORE_RESTAURANTS_STATE:
-            self.state = self.no_more_restaurants_handler()
+        elif self.state == self.no_more_recommendations_state:
+            self.state = self.no_more_recommendations_handler()
             return
 
         elif self.state == self.RECOMMEND_MORE_STATE:
