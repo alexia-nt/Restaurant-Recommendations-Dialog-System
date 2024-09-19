@@ -8,12 +8,6 @@ class RestaurantRecommendationSystem:
     LR_FILE = "models/lr_model.pkl"
     VECTORIZER_FILE = "models/vectorizer.pkl"
 
-    with open(LR_FILE,'rb') as file:
-        LR_model = pickle.load(file)
-    with open(VECTORIZER_FILE,'rb') as file:
-        vectorizer = pickle.load(file)
-    #y_pred_LR = LR_model.predict(vectorizer.transform(["hi"]))[0]
-
     WELCOME_STATE = 1
     ASK_INITIAL_PREFERENCES_STATE = 2
     ASK_FOOD_STATE = 3
@@ -25,11 +19,8 @@ class RestaurantRecommendationSystem:
     RECOMMEND_MORE_STATE = 9
     END_STATE = 10
 
-    levenshtein_threshold = 1
-
-    possible_restaurants = [] 
-    #I'm using this variable to keep track of which restaurants have not been shown to the user yet
-    #Maybe there's a better way?
+    # levenshtein_threshold = 1
+    # possible_restaurants = []
 
     DONT_CARE_KEYWORDS = [
         "do not care", "don't care", "dont care",
@@ -39,13 +30,29 @@ class RestaurantRecommendationSystem:
     ]
 
     def __init__(self):
+        # Read restaurant data
         self.df = pd.read_csv(self.DATA_FILE)
+
+        # Extract keywords for preferences
         self.food_keywords, self.price_keywords, self.area_keywords = self.get_keywords()
+
+        # Initialize state
         self.state = self.WELCOME_STATE
+
+        # Initialize variables
         self.user_input = ""
         self.food_preference = None
         self.price_preference = None
         self.area_preference = None
+
+        self.possible_restaurants = []
+        self.levenshtein_threshold = 1
+
+        
+        with open(self.LR_FILE,'rb') as file:
+            self.LR_model = pickle.load(file)
+        with open(self.VECTORIZER_FILE,'rb') as file:
+            self.vectorizer = pickle.load(file)
 
     def get_keywords(self):
         food_keywords = list(self.df["food"].dropna().astype(str).unique())
@@ -171,71 +178,115 @@ class RestaurantRecommendationSystem:
         return
 
     def recommend_handler(self):
-        restaurants = self.get_matching_restaurants()
-        if (len(restaurants)) == 0:
+        # Grounding
+        print(f"Ok, I am searching for a {self.price_preference}ly priced {self.food_preference} restaurant in the {self.area_preference}...")
+        
+        self.possible_restaurants = self.get_matching_restaurants()
+
+        # If there are no matching restaurants
+        if (len(self.possible_restaurants)) == 0:
             print(f"I found no restaurant based on your preferences. Do you want something else?")
             self.user_input = input(">>").lower()
-            dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
-            if dialog_act in ("bye","negate","deny"):
-                return self.END_STATE
-            else:
-                self.food_preference = None
-                self.price_preference = None
-                self.area_preference = None
-                self.state = self.ASK_INITIAL_PREFERENCES_STATE
-                print(dialog_act)
-                return
+            return self.NO_MORE_RECOMMENDATIONS_STATE
+            
+        # If there are matching restaurants
         else:
-            print(f"{restaurants[0]['restaurantname']} is a nice restaurant serving {restaurants[0]['food']} food.")
+            if (len(self.possible_restaurants)) == 1:
+                print("I found ", len(self.possible_restaurants), " restaurant based on your preferences.")
+            else:
+                print("I found ", len(self.possible_restaurants), " restaurants based on your preferences.")
+
+            print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
+            
             self.user_input = input(">>").lower()
             dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            print("dialog act: ", dialog_act)
+
+            # If dialog act is bye, ack or affirm, go to "end" state 
             if dialog_act in ("bye", "ack", "affirm"):
                 return self.END_STATE
+            
+            # If dialog act is reqmore or reqalts, go to "recommend more restaurants" state (reqalts might be wrong here ??)
             elif dialog_act in ("reqmore","reqalts"):
                 return self.RECOMMEND_MORE_STATE
+            
+            # If dialog act is request, user wants the details of the recommended restaurant
             elif dialog_act == "request":
                 return self.GIVE_DETAILS_STATE
+             
+            # Default case, continue recommending more restaurants
             else:
                 return self.RECOMMEND_MORE_STATE
             
-    def no_more_recommendation_handler(self):
-        return
+    def no_more_recommendations_handler(self):
+        # Predict dialog act
+        dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        print("dialog act: ", dialog_act)
+
+        # If dialog act is bye, negate or deny, go to "end" state
+        if dialog_act in ("bye","negate","deny"):
+            return self.END_STATE
+        
+        # If the user does not want to end the conversation, go to "ask initial preferences" state
+        else:
+            # Forget previous user preferences by setting the preferences to None
+            self.food_preference = None
+            self.price_preference = None
+            self.area_preference = None
+            return self.ASK_INITIAL_PREFERENCES_STATE
                         
     def recommend_more_handler(self):
-        #TypeError: 'dict' object cannot be interpreted as an integer
-        # Handler to recommend more restaurants
-        self.possible_restaurants.pop(next(iter(self.possible_restaurants)))
-        
-        print(f"{self.possible_restaurants[0]['restaurantname']} is another nice restaurant serving {self.possible_restaurants[0]['food']} food.")
-        self.user_input = input(">>").lower()
-        dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
-        if dialog_act in ("bye", "ack", "affirm"):
-            return self.END_STATE
-        elif dialog_act in ("reqmore","reqalts"):
-            if (len(self.possible_restaurants) > 1):
-                return self.RECOMMEND_MORE_STATE
-            else:
-                print("There are no other restaurants for your preferences.")
-                return self.NO_MORE_RECOMMENDATIONS_STATE
-        elif dialog_act == "request":
-            self.state = self.GIVE_DETAILS_STATE
-        else:
+        # If there are more restaurants to recommend
+        if len(self.possible_restaurants) > 1:
+            # Remove the previously recommended restaurant from the list
+            self.possible_restaurants.pop(0)
+
+            # Recommend the first restaurant in the list
             print(f"{self.possible_restaurants[0]['restaurantname']} is another nice restaurant serving {self.possible_restaurants[0]['food']} food.")
 
+            # Get user input and predict dialog act
+            self.user_input = input(">>").lower()
+            dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            print("dialog act: ", dialog_act)
+
+            # If dialog act is bye, ack, or affirm, go to the "end" state
+            if dialog_act in ("bye", "ack", "affirm"):
+                return self.END_STATE
+            
+            # If the user requests more recommendations or alternatives
+            elif dialog_act in ("reqmore", "reqalts"):
+                return self.RECOMMEND_MORE_STATE
+            
+            # If the user requests details of the recommended restaurant
+            elif dialog_act == "request":
+                return self.GIVE_DETAILS_STATE
+            
+            # Default case, continue recommending more restaurants
+            else:
+                return self.RECOMMEND_MORE_STATE
+        
+        # If there are no more restaurants to recommend
+        else:
+            print("There are no more restaurants to recommend. Do you want something else?")
+            self.user_input = input(">>").lower()
+            return self.NO_MORE_RECOMMENDATIONS_STATE
 
     def give_details_handler(self):
-        print(f"{self.possible_restaurants[0]['restaurantname']} is a {self.possible_restaurants[0]['pricerange']}ly priced {self.possible_restaurants[0]['food']} restaurant in the {self.possible_restaurants[0]['area']} of town. Phone number: {self.possible_restaurants[0]['phone']}. Address: {self.possible_restaurants[0]['addr']}. Postcode: {self.possible_restaurants[0]['postcode']}.")
+        print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant. Phone number: {self.possible_restaurants[0]['phone']}. Address: {self.possible_restaurants[0]['addr']}. Postcode: {self.possible_restaurants[0]['postcode']}.")
         self.user_input = input(">>").lower()
         dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        print("dialog act: ", dialog_act)
+
+        # If the dialog act is reqmore or reqalts, go to "recommend more restaurants" state (reqalts might be wrong here ??)
         if dialog_act in ("reqmore","reqalts"):
             return self.RECOMMEND_MORE_STATE
+        
+        # maybe add the choice to go to "ask initial preferences" state ??
+
+        # Else, go to end state
         else:
             return self.END_STATE
-            
         
-
-
-
     # ------------------------ State Transition ------------------------
 
     def handle_transition(self):
@@ -272,29 +323,22 @@ class RestaurantRecommendationSystem:
             return
 
         elif self.state == self.RECOMMEND_MORE_STATE:
-            self.state = self.END_STATE
-            self.recommend_more_handler()
+            self.state = self.recommend_more_handler()
             return
 
         elif self.state == self.GIVE_DETAILS_STATE:
             self.state = self.give_details_handler()
             return
-            
-
 
     def run(self):
         while self.state != self.END_STATE:
             self.handle_transition()
 
             print("State: ", self.state)
-            print("User input: ", self.user_input)
-            print("food_type: ", self.food_preference)
-            print("price_range: ", self.price_preference)
-            print("area: ", self.area_preference)
+        
+        print("Goodbye, I hope I was helpful!")
 
 # Create an instance and run the system
 if __name__ == "__main__":
     system = RestaurantRecommendationSystem()
     system.run()
-
-# branch another test
