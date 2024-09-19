@@ -224,9 +224,13 @@ class RestaurantRecommendationSystem:
 
 
     def give_details_handler(self):
-        print(self.possible_restaurants[0])
-        self.state = self.END_STATE 
-        #does this need more?
+        print(f"{self.possible_restaurants[0]['restaurantname']} is a {self.possible_restaurants[0]['pricerange']}ly priced {self.possible_restaurants[0]['food']} restaurant in the {self.possible_restaurants[0]['area']} of town. Phone number: {self.possible_restaurants[0]['phone']}. Address: {self.possible_restaurants[0]['addr']}. Postcode: {self.possible_restaurants[0]['postcode']}.")
+        self.user_input = input(">>").lower()
+        dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        if dialog_act in ("reqmore","reqalts"):
+            return self.RECOMMEND_MORE_STATE
+        else:
+            return self.END_STATE
             
         
 
@@ -263,7 +267,7 @@ class RestaurantRecommendationSystem:
             self.state = self.recommend_handler()
             return 
         
-        elif self.state == self.no_more_recommendations_state:
+        elif self.state == self.NO_MORE_RECOMMENDATIONS_STATE:
             self.state = self.no_more_recommendations_handler()
             return
 
@@ -273,7 +277,7 @@ class RestaurantRecommendationSystem:
             return
 
         elif self.state == self.GIVE_DETAILS_STATE:
-            self.give_details_handler()
+            self.state = self.give_details_handler()
             return
             
 
