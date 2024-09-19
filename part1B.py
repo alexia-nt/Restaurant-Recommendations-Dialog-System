@@ -177,11 +177,11 @@ class RestaurantRecommendationSystem:
             self.user_input = input(">>").lower()
             dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
             if dialog_act in ("bye","negate","deny"):
-                self.state = self.END_STATE
+                return self.END_STATE
             else:
-                self.food_preference = self.extract_initial_preferences(self.user_input, self.food_keywords, "food")
-                self.price_preference = self.extract_initial_preferences(self.user_input, self.price_keywords, "price")
-                self.area_preference = self.extract_initial_preferences(self.user_input, self.area_keywords, "area")
+                self.food_preference = None
+                self.price_preference = None
+                self.area_preference = None
                 self.state = self.ASK_INITIAL_PREFERENCES_STATE
                 print(dialog_act)
                 return
@@ -190,28 +190,33 @@ class RestaurantRecommendationSystem:
             self.user_input = input(">>").lower()
             dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
             if dialog_act in ("bye", "ack", "affirm"):
-                self.state = self.END_STATE
+                return self.END_STATE
             elif dialog_act in ("reqmore","reqalts"):
-                self.state = self.RECOMMEND_MORE_STATE
+                return self.RECOMMEND_MORE_STATE
             elif dialog_act == "request":
-                self.state = self.GIVE_DETAILS_STATE
+                return self.GIVE_DETAILS_STATE
             else:
-                print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
+                return self.RECOMMEND_MORE_STATE
             
+    def no_more_restaurants_handler(self):
+        return
+                        
     def recommend_more_handler(self):
         #TypeError: 'dict' object cannot be interpreted as an integer
+        # Handler to recommend more restaurants
         self.possible_restaurants.pop(next(iter(self.possible_restaurants)))
         
         print(f"{self.possible_restaurants[0]['restaurantname']} is another nice restaurant serving {self.possible_restaurants[0]['food']} food.")
         self.user_input = input(">>").lower()
         dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
         if dialog_act in ("bye", "ack", "affirm"):
-            self.state = self.END_STATE
+            return self.END_STATE
         elif dialog_act in ("reqmore","reqalts"):
             if (len(self.possible_restaurants) > 1):
-                self.state = self.RECOMMEND_MORE_STATE
+                return self.RECOMMEND_MORE_STATE
             else:
                 print("There are no other restaurants for your preferences.")
+                return self.NO_MORE_RESTAURANTS_STATE
         elif dialog_act == "request":
             self.state = self.GIVE_DETAILS_STATE
         else:
@@ -255,8 +260,11 @@ class RestaurantRecommendationSystem:
             return
 
         elif self.state == self.RECOMMEND_STATE:
-            self.state = self.END_STATE
-            self.recommend_handler()
+            self.state = self.recommend_handler()
+            return 
+        
+        elif self.state == self.NO_MORE_RESTAURANTS_STATE:
+            self.state = self.no_more_restaurants_handler()
             return
 
         elif self.state == self.RECOMMEND_MORE_STATE:
