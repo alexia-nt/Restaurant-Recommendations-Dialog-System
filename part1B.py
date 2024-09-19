@@ -263,7 +263,7 @@ class RestaurantRecommendationSystem:
             self.state = self.recommend_handler()
             return 
         
-        elif self.state == self.no_more_recommendations_state:
+        elif self.state == self.NO_MORE_RECOMMENDATIONS_STATE:
             self.state = self.no_more_recommendations_handler()
             return
 
