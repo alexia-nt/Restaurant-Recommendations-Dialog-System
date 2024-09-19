@@ -63,10 +63,9 @@ class RestaurantRecommendationSystem:
         area_keywords = list(self.df["area"].dropna().astype(str).unique())
         return food_keywords, price_keywords, area_keywords
 
-    def extract_initial_preferences(self, utterance, keywords, preference_type):
-        if f"any {preference_type}" in utterance:
-            return "any"
-        
+    # Come to this function either from extract_initial_preferences or extract_preferences,
+    # after they have checked for "any" preferences
+    def extract_specific_preferences(self, utterance, keywords):
         for keyword in keywords:
             if keyword in utterance:
                 return keyword
@@ -79,28 +78,27 @@ class RestaurantRecommendationSystem:
             if word == "want":
                 continue 
             for keyword in keywords:
+                # Check if any word from the utterance matches part of a multi-word keyword
+                # e.g. if the user want "asian" return "asian oriental" which is an are keyword
+                if word in keyword.split():
+                    return keyword
                 distance = Levenshtein.distance(word.lower(), keyword.lower())
                 if distance <= self.levenshtein_threshold:  # Adjust threshold as needed
                     return keyword
         return None
+        
+    def extract_initial_preferences(self, utterance, keywords, preference_type):
+        if f"any {preference_type}" in utterance:
+            return "any"
+        
+        return self.extract_specific_preferences(utterance, keywords)
 
     def extract_preferences(self, utterance, keywords):
         for keyword in self.DONT_CARE_KEYWORDS:
             if keyword in utterance:
                 return "any"
-        
-        for keyword in keywords:
-            if keyword in utterance:
-                return keyword
-        
-        utterance_words = utterance.lower().split()
-        
-        for word in utterance_words:
-            for keyword in keywords:
-                distance = Levenshtein.distance(word.lower(), keyword.lower())
-                if distance <= self.levenshtein_threshold:  # Adjust threshold as needed
-                    return keyword
-        return None
+            
+        return self.extract_specific_preferences(utterance, keywords)
 
     def get_matching_restaurants(self):
         filtered_df = self.df.copy()
@@ -198,7 +196,7 @@ class RestaurantRecommendationSystem:
 
     def recommend_handler(self):
         # Grounding
-        print(f"Ok, I am searching for a restaurant based on the following preferences: {self.food_preference} restaurant at a {self.price_preference} price in the {self.area_preference} area...")
+        print(f"Ok, I am searching for a restaurant based on the following preferences: {self.food_preference} restaurant at {self.price_preference} price in {self.area_preference} area...")
         
         self.possible_restaurants = self.get_matching_restaurants()
 
