@@ -2,6 +2,10 @@ import pandas as pd
 import Levenshtein
 import pickle
 
+LR_MODEL_PREFERENCE = 1
+DT_MODEL_PREFERENCE = 2
+RULE_BASED_MODEL_PREFERENCE = 3
+
 class RestaurantRecommendationSystem:
     DATA_FILE = "data/restaurant_info.csv"
     DT_FILE = "models/dt_model.pkl"
@@ -19,9 +23,6 @@ class RestaurantRecommendationSystem:
     RECOMMEND_MORE_STATE = 9
     END_STATE = 10
 
-    # levenshtein_threshold = 1
-    # possible_restaurants = []
-
     DONT_CARE_KEYWORDS = [
         "do not care", "don't care", "dont care",
         "do not mind", "don't mind", "dont mind",
@@ -29,7 +30,25 @@ class RestaurantRecommendationSystem:
         "any", "anywhere", "whatever"
     ]
 
-    def __init__(self):
+    RULE_BASED_MODEL_RULES = {
+        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
+        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search', 'detail'],
+        'thankyou': ['thank', 'thanks', 'appreciate', 'grateful', 'thank you', 'many thanks', 'thankful'],
+        'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
+        'null': ['cough', 'noise', 'laugh', 'uh', 'um', 'background', 'incoherent'],
+        'affirm': ['yes', 'yeah', 'right', 'correct', 'sure', 'absolutely', 'definitely', 'of course', 'affirm', 'indeed'],
+        'negate': ['no', 'not', 'don\'t', 'nope', 'none', 'wrong', 'never', 'incorrect'],
+        'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later', 'take care', 'talk to you soon'],
+        'confirm': ['confirm', 'is it', 'check if', 'right?', 'verify', 'am i correct', 'confirming', 'confirmation', 'can you confirm'],
+        'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
+        'repeat': ['repeat', 'again', 'say again', 'can you repeat', 'could you repeat', 'pardon'],
+        'ack': ['okay', 'um', 'uh-huh', 'got it', 'alright', 'fine', 'ok', 'acknowledge'],
+        'deny': ['dont want', 'don\'t want', 'reject', 'not that', 'no thanks', 'not interested', 'decline', 'denying'],
+        'restart': ['restart', 'start over', 'begin again', 'reset', 'new', 'begin anew'],
+        'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further']
+    }
+
+    def __init__(self, model_preference):
         # Read restaurant data
         self.df = pd.read_csv(self.DATA_FILE)
 
@@ -51,11 +70,23 @@ class RestaurantRecommendationSystem:
         self.possible_restaurants = []
         self.levenshtein_threshold = 1
 
+        self.model_preference = model_preference
         
-        with open(self.LR_FILE,'rb') as file:
-            self.LR_model = pickle.load(file)
-        with open(self.VECTORIZER_FILE,'rb') as file:
-            self.vectorizer = pickle.load(file)
+        if(self.model_preference == LR_MODEL_PREFERENCE):
+            # Load LR model
+            with open(self.LR_FILE,'rb') as file:
+                self.LR_model = pickle.load(file)
+            # Load vectorizer
+            with open(self.VECTORIZER_FILE,'rb') as file:
+                self.vectorizer = pickle.load(file)
+
+        elif(self.model_preference == DT_MODEL_PREFERENCE):
+            # Load DT model
+            with open(self.DT_FILE,'rb') as file:
+                self.DT_model = pickle.load(file)
+            # Load vectorizer
+            with open(self.VECTORIZER_FILE,'rb') as file:
+                self.vectorizer = pickle.load(file)
 
     def get_keywords(self):
         food_keywords = list(self.df["food"].dropna().astype(str).unique())
@@ -68,6 +99,8 @@ class RestaurantRecommendationSystem:
     def extract_specific_preferences(self, utterance, keywords):
         for keyword in keywords:
             if keyword in utterance:
+                if keyword == "center":
+                    return "centre"
                 return keyword
         
         utterance_words = utterance.lower().split()
@@ -117,13 +150,31 @@ class RestaurantRecommendationSystem:
             return self.possible_restaurants
         else:
             return []
+        
+    def rule_based_model_get_label(self):
+
+        for label, keywords in self.RULE_BASED_MODEL_RULES.items():
+            if any(keyword in self.user_input for keyword in keywords):
+                return label
+
+        # Default label if no keyword matches
+        return 'inform'
+        
+    def dialog_act_prediction(self):
+        if(self.model_preference == LR_MODEL_PREFERENCE):
+            return self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        elif(self.model_preference == DT_MODEL_PREFERENCE):
+            return self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        else:
+            return self.rule_based_model_get_label()
 
     # ------------------------ State Handlers ------------------------
 
     def welcome_state_handler(self):
         print("Hello, welcome to the restaurant recommendations dialogue system! You can ask for restaurants by area, price range, or food type.")
         self.user_input = input(">>").lower()
-        dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        # dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        dialog_act = self.dialog_act_prediction()
         print(f"Dialog act: {dialog_act}")
         return
 
@@ -151,7 +202,8 @@ class RestaurantRecommendationSystem:
         while self.food_preference is None:
             self.user_input = input(">>").lower()
 
-            dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            # dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            dialog_act = self.dialog_act_prediction()
             print(f"Dialog act: {dialog_act}")
 
             self.food_preference = self.extract_preferences(self.user_input, self.food_keywords)
@@ -168,7 +220,8 @@ class RestaurantRecommendationSystem:
         while self.price_preference is None:
             self.user_input = input(">>").lower()
 
-            dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            # dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            dialog_act = self.dialog_act_prediction()
             print(f"Dialog act: {dialog_act}")
 
             self.price_preference = self.extract_preferences(self.user_input, self.price_keywords)
@@ -185,7 +238,8 @@ class RestaurantRecommendationSystem:
         while self.area_preference is None:
             self.user_input = input(">>").lower()
 
-            dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            # dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            dialog_act = self.dialog_act_prediction()
             print(f"Dialog act: {dialog_act}")
 
             self.area_preference = self.extract_preferences(self.user_input, self.area_keywords)
@@ -216,7 +270,8 @@ class RestaurantRecommendationSystem:
             print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
             
             self.user_input = input(">>").lower()
-            dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            # dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            dialog_act = self.dialog_act_prediction()
             print("dialog act: ", dialog_act)
 
             # If dialog act is bye, ack or affirm, go to "end" state 
@@ -237,7 +292,8 @@ class RestaurantRecommendationSystem:
             
     def no_more_recommendations_handler(self):
         # Predict dialog act
-        dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        # dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        dialog_act = self.dialog_act_prediction()
         print("dialog act: ", dialog_act)
 
         # If dialog act is bye, negate or deny, go to "end" state
@@ -263,7 +319,8 @@ class RestaurantRecommendationSystem:
 
             # Get user input and predict dialog act
             self.user_input = input(">>").lower()
-            dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            # dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            dialog_act = self.dialog_act_prediction()
             print("dialog act: ", dialog_act)
 
             # If dialog act is bye, ack, or affirm, go to the "end" state
@@ -291,7 +348,8 @@ class RestaurantRecommendationSystem:
     def give_details_handler(self):
         print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant. Phone number: {self.possible_restaurants[0]['phone']}. Address: {self.possible_restaurants[0]['addr']}. Postcode: {self.possible_restaurants[0]['postcode']}.")
         self.user_input = input(">>").lower()
-        dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        # dialog_act = self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+        dialog_act = self.dialog_act_prediction()
         print("dialog act: ", dialog_act)
 
         # If the dialog act is reqmore or reqalts, go to "recommend more restaurants" state (reqalts might be wrong here ??)
@@ -355,7 +413,40 @@ class RestaurantRecommendationSystem:
         
         print("Goodbye, I hope I was helpful!")
 
+def print_menu():
+    """Choose model for dialog act classification."""
+    print("\nOptions:")
+    print("1. Linear Regression Model")
+    print("2. Decision Tree Model")
+    print("3. Rule Based Model")
+
 # Create an instance and run the system
 if __name__ == "__main__":
-    system = RestaurantRecommendationSystem()
+    # Display the menu
+    print_menu()
+
+    # Get input from the user
+    choice = input("\nEnter your choice (1/2/3).\n>>").strip()
+
+    while True:
+        
+        if(choice == '1'):
+            model_preference = LR_MODEL_PREFERENCE
+            break
+        elif(choice == '2'):
+            model_preference = DT_MODEL_PREFERENCE
+            break
+        elif(choice == '3'):
+            model_preference = RULE_BASED_MODEL_PREFERENCE
+            break
+        
+        else:
+            # Display the menu
+            print_menu()
+
+            # Get input from the user
+            choice = input("\nInvalid choice. Please select a valid option (1/2/3).\n>>")
+
+    print("\nStarting conversation...\n")
+    system = RestaurantRecommendationSystem(model_preference)
     system.run()
