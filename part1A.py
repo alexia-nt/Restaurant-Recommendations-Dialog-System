@@ -241,7 +241,7 @@ def print_metrics(y_test, y_pred, model_name):
     print("Recall:", recall)
     print("F1-score:", f1)
 
-def print_metrics_for_each_model(df, X1_test, y1_test, y2_test, y1_pred_DT, y1_pred_LR, y2_pred_DT, y2_pred_LR):
+def print_metrics_for_each_model(df, X_dup_test, y_dup_test, y_no_dup_test, y_dup_pred_DT, y_dup_pred_LR, y_no_dup_pred_DT, y_no_dup_pred_LR):
     """
     Prints evaluation metrics for both the majority-label model and the rule-based model.
 
@@ -252,25 +252,25 @@ def print_metrics_for_each_model(df, X1_test, y1_test, y2_test, y1_pred_DT, y1_p
     """
     # Make predictions and print metrics for the majority label model
     print("\nMajority-Label Model - Evaluation Metrics:")
-    y_pred_ml = majority_label_model_predict(df, X1_test)
-    print_metrics(y1_test, y_pred_ml, "Majority-Label Model")
+    y_pred_ml = majority_label_model_predict(df, X_dup_test)
+    print_metrics(y_dup_test, y_pred_ml, "Majority-Label Model")
 
     # Make predictions and print metrics for the rule based model
     print("\nRule-Based Model - Evaluation Metrics:")
-    y_pred_rb = rule_based_model_predict(X1_test)
-    print_metrics(y1_test, y_pred_rb, "Rule-Based Model")
+    y_pred_rb = rule_based_model_predict(X_dup_test)
+    print_metrics(y_dup_test, y_pred_rb, "Rule-Based Model")
 
     print("\nDecision-Tree model - Evaluation Metrics:")
     print("\nOriginal data:")
-    print_metrics(y1_test, y1_pred_DT, "DT-model original data")
+    print_metrics(y_dup_test, y_dup_pred_DT, "DT-model original data")
     print("\nData without duplications:")
-    print_metrics(y2_test, y2_pred_DT, "DT-model no-dup data")
+    print_metrics(y_no_dup_test, y_no_dup_pred_DT, "DT-model no-dup data")
 
     print("\nLogistic-Regression model - Evaluation Metrics:")
     print("\nOriginal data:")
-    print_metrics(y1_test, y1_pred_LR, "LR-model original data")
+    print_metrics(y_dup_test, y_dup_pred_LR, "LR-model original data")
     print("\nData without duplications:")
-    print_metrics(y2_test, y2_pred_LR, "LR-model no-dup data")
+    print_metrics(y_no_dup_test, y_no_dup_pred_LR, "LR-model no-dup data")
 
 
 def print_menu():
@@ -280,7 +280,7 @@ def print_menu():
     print("2. Give an utterance for prediction")
     print("3. Exit")
 
-def main():
+if __name__ == "__main__":
     # Load the data into a DataFrame
     df = create_dataframe(DATA_FILE)
 
@@ -288,22 +288,22 @@ def main():
     df_no_dup = create_dataframe_no_dup(df)
 
     # Split the data into features (utterances) and labels
-    X_1 = df['utterance']
-    y_1 = df['label']
-    X_2 = df_no_dup['utterance']
-    y_2 = df_no_dup['label']
+    X_dup = df['utterance']
+    X_dup = df['label']
+    X_no_dup = df_no_dup['utterance']
+    X_no_dup = df_no_dup['label']
 
     # Split the data into training and testing sets
-    X1_train, X1_test, y1_train, y1_test = train_test_split(X_1, y_1, test_size=0.15, random_state=42)
-    X2_train, X2_test, y2_train, y2_test = train_test_split(X_2, y_2, test_size=0.15, random_state=42)
+    X_dup_train, X_dup_test, y_dup_train, y_dup_test = train_test_split(X_dup, X_dup, test_size=0.15, random_state=42)
+    X_no_dup_train, X_no_dup_test, y_no_dup_train, y_no_dup_test = train_test_split(X_no_dup, X_no_dup, test_size=0.15, random_state=42)
 
     # Make predictions on original data for DT and LR
-    DT_model, LR_model, vectorizer = train_DT_LR(X1_train, y1_train)
-    y1_pred_DT, y1_pred_LR = predict_DT_LR(DT_model, LR_model, vectorizer, X1_test)
+    DT_model, LR_model, vectorizer = train_DT_LR(X_dup_train, y_dup_train)
+    y_dup_pred_DT, y_dup_pred_LR = predict_DT_LR(DT_model, LR_model, vectorizer, X_dup_test)
 
     # Make predictions on no dup test set for DT and LR
-    DT_model_no_dup, LR_model_no_dup, vectorizer_no_dup = train_DT_LR(X2_train, y2_train)
-    y2_pred_DT, y2_pred_LR = predict_DT_LR(DT_model_no_dup, LR_model_no_dup, vectorizer_no_dup, X2_test)
+    DT_model_no_dup, LR_model_no_dup, vectorizer_no_dup = train_DT_LR(X_no_dup_train, y_no_dup_train)
+    y_no_dup_pred_DT, y_no_dup_pred_LR = predict_DT_LR(DT_model_no_dup, LR_model_no_dup, vectorizer_no_dup, X_no_dup_test)
    
 
     while True:
@@ -315,7 +315,7 @@ def main():
 
         if choice == '1':
             # Print evaluation metrics
-            print_metrics_for_each_model(df, X1_test, y1_test, y2_test, y1_pred_DT, y1_pred_LR, y2_pred_DT, y2_pred_LR)
+            print_metrics_for_each_model(df, X_dup_test, y_dup_test, y_no_dup_test, y_dup_pred_DT, y_dup_pred_LR, y_no_dup_pred_DT, y_no_dup_pred_LR)
 
 
         elif choice == '2':
@@ -347,5 +347,4 @@ def main():
         else:
             print("Invalid choice. Please select a valid option.")
 
-# Run the main function
-main()
+
