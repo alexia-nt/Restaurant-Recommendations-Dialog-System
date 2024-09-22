@@ -88,6 +88,7 @@ class RestaurantRecommendationSystem:
         self.price_preference = None
         self.area_preference = None
 
+        # ADDED
         self.additional_preference = None
 
         self.possible_restaurants = []
@@ -156,10 +157,12 @@ class RestaurantRecommendationSystem:
             
         return self.extract_specific_preferences(utterance, keywords)
 
+    # ADDED
     def extract_additional_preference(self, additional_preferences_keywords):
         # TO DO
         return None
     
+    # ADDED
     def run_inference(self):
         # TO DO
         # use self.possible_restaurants
@@ -183,6 +186,7 @@ class RestaurantRecommendationSystem:
         else:
             return []
     
+    # ADDED
     def get_matching_restaurants_with_additional_preference(self):
         # Run inference to assign values to the 'consequent' column for the possible restaurants
         self.run_inference()
@@ -320,6 +324,7 @@ class RestaurantRecommendationSystem:
             else:
                 print("I found ", len(self.possible_restaurants), " restaurants based on your preferences.")
 
+            # ADDED
             print("Do you have additional requirements?")
             self.user_input = input(">>").lower()
 
@@ -335,6 +340,7 @@ class RestaurantRecommendationSystem:
 
             return self.found_restaurant_for_recommendation()
     
+    # ADDED
     def additional_preferences_handler(self):
         # Extract preferences from user input
         self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
@@ -461,6 +467,7 @@ class RestaurantRecommendationSystem:
             self.state = self.recommend_handler()
             return
         
+        # ADDED
         elif self.state == self.ADDITIONAL_PREFERENCES_STATE:
             self.state = self.additional_preferences_handler()
             return
