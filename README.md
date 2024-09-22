@@ -7,7 +7,8 @@ Run the 'part1B.py' file to start the code. The conversational flow starts immed
 ## Installation Requirements
 
 Python 3.x
+
 Libraries:
-    pandas
-    Levenshtein
-    pickle
+- pandas
+- Levenshtein
+- pickle
