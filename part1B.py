@@ -218,7 +218,7 @@ class RestaurantRecommendationSystem:
             if keyword in utterance:
                 return "any"
             
-        return self.extract_specifprintic_preferences(utterance, keywords)
+        return self.extract_specific_preferences(utterance, keywords)
 
     def get_matching_restaurants(self):
         """
