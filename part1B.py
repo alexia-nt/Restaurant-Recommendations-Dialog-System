@@ -250,6 +250,27 @@ class RestaurantRecommendationSystem:
         else:
             return []
         
+    def print_details(self):
+        """
+        Prints the available details for the recommended restaurant.
+        
+        """
+        print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant:")
+        if(pd.isna(self.possible_restaurants[0]['phone'])):
+            print("I don't have an available phone number.")
+        else:
+            print(f"The phone number is {self.possible_restaurants[0]['phone']}.")
+        
+        if(pd.isna(self.possible_restaurants[0]['addr'])):
+            print("I don't have an available address.")
+        else:
+            print(f"The address is {self.possible_restaurants[0]['addr']}.")
+        
+        if(pd.isna(self.possible_restaurants[0]['postcode'])):
+            print("I don't have an available post code.")
+        else:
+            print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
+    
     def rule_based_model_get_label(self):
         """
         Determines the dialog act label using the Rule-Based model
@@ -526,8 +547,8 @@ class RestaurantRecommendationSystem:
         - (int): The next state (END or RECOMMEND_MORE)
 
         """
-        print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant. Phone number: {self.possible_restaurants[0]['phone']}. Address: {self.possible_restaurants[0]['addr']}. Postcode: {self.possible_restaurants[0]['postcode']}.")
-        
+        self.print_details()
+
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
 
