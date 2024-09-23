@@ -101,10 +101,15 @@ class RestaurantRecommendationSystem:
         # 1. food quality (good food / bad food)
         # 2. crowdedness (busy / quiet)
         # 3. length of stay (long stay / short stay)
-        # 4. consequent (touristic / assigned seats / children / romantic)
 
-        # The initial values for the 'consequent' column should be None.
-        # The values for this column will be derived from inference if the user has additional preferences
+        # Consequents
+        # 4. touristic
+        # 5. assigned seats
+        # 6. children
+        # 7. romantic
+
+        # The initial values for the 'consequent' columns should be False.
+        # The values for this column can become True from inference if the user has additional preferences.
 
         # Extract keywords for preferences
         self.food_keywords, self.price_keywords, self.area_keywords = self.get_keywords()
