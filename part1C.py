@@ -49,6 +49,7 @@ class RestaurantRecommendationSystem:
     GIVE_DETAILS_STATE = 8
     RECOMMEND_MORE_STATE = 9
     END_STATE = 10
+    ADDITIONAL_PREFERENCES_STATE = 11
 
     DONT_CARE_KEYWORDS = [
         "do not care", "don't care", "dont care",
