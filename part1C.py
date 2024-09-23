@@ -81,6 +81,8 @@ class RestaurantRecommendationSystem:
         'null': ['cough', 'noise', 'laugh', 'uh', 'um', 'background', 'incoherent']
     }
 
+    ADDITIONAL_PREFERENCES_KEYWORDS = ["touristic", "assigned seats", "children", "romantic"]
+
     def __init__(self, model_preference):
         """
         Parameters
