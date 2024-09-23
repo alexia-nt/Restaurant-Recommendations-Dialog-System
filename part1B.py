@@ -552,13 +552,21 @@ class RestaurantRecommendationSystem:
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
 
-        # If the dialog act is reqmore or reqalts, go to "recommend more restaurants" state (reqalts might be wrong here ??)
-        if dialog_act in ("reqmore","reqalts"):
+        # If dialog act is bye, ack, or affirm, go to the "end" state
+        if dialog_act in ("bye", "ack", "affirm"):
+            return self.END_STATE
+        
+        # Default case, continue recommending more restaurants
+        else:
             return self.RECOMMEND_MORE_STATE
 
-        # Else, go to "end" state
-        else:
-            return self.END_STATE
+        # If the dialog act is reqmore or reqalts, go to "recommend more restaurants" state (reqalts might be wrong here ??)
+        # if dialog_act in ("reqmore","reqalts"):
+        #     return self.RECOMMEND_MORE_STATE
+
+        # # Else, go to "end" state
+        # else:
+        #     return self.END_STATE
         
     # ------------------------ State Transition ------------------------
 
@@ -620,7 +628,7 @@ class RestaurantRecommendationSystem:
         while self.state != self.END_STATE:
             self.handle_transition()
         
-        print("Goodbye, I hope I was helpful!")
+        print("I hope I was helpful, goodbye!")
 
 def print_menu():
     """
