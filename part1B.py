@@ -559,14 +559,6 @@ class RestaurantRecommendationSystem:
         # Default case, continue recommending more restaurants
         else:
             return self.RECOMMEND_MORE_STATE
-
-        # If the dialog act is reqmore or reqalts, go to "recommend more restaurants" state (reqalts might be wrong here ??)
-        # if dialog_act in ("reqmore","reqalts"):
-        #     return self.RECOMMEND_MORE_STATE
-
-        # # Else, go to "end" state
-        # else:
-        #     return self.END_STATE
         
     # ------------------------ State Transition ------------------------
 
