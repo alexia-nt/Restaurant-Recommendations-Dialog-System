@@ -94,6 +94,17 @@ class RestaurantRecommendationSystem:
         # Read restaurant data
         self.df = pd.read_csv(self.DATA_FILE)
 
+        # TO DO
+        # add additional columns to df with random values
+
+        # 1. food quality (good food / bad food)
+        # 2. crowdedness (busy / quiet)
+        # 3. length of stay (long stay / short stay)
+        # 4. consequent (touristic / assigned seats / children / romantic)
+
+        # The initial values for the 'consequent' column should be None.
+        # The values for this column will be derived from inference if the user has additional preferences
+
         # Extract keywords for preferences
         self.food_keywords, self.price_keywords, self.area_keywords = self.get_keywords()
         # Add "center" in area keywords, so it is also included in the
@@ -108,6 +119,9 @@ class RestaurantRecommendationSystem:
         self.food_preference = None
         self.price_preference = None
         self.area_preference = None
+
+        # ADDED
+        self.additional_preference = None
 
         self.possible_restaurants = []
         self.levenshtein_threshold = 1
@@ -220,6 +234,17 @@ class RestaurantRecommendationSystem:
             
         return self.extract_specific_preferences(utterance, keywords)
 
+    # ADDED
+    def extract_additional_preference(self, additional_preferences_keywords):
+        # TO DO
+        return None
+    
+    # ADDED
+    def run_inference(self):
+        # TO DO
+        # use self.possible_restaurants
+        return
+    
     def get_matching_restaurants(self):
         """
         Filters the restaurant dataset based on user
@@ -270,6 +295,16 @@ class RestaurantRecommendationSystem:
             print("I don't have an available post code.")
         else:
             print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
+    
+    # ADDED
+    def get_matching_restaurants_with_additional_preference(self):
+        # Run inference to assign values to the 'consequent' column for the possible restaurants
+        self.run_inference()
+
+        # TO DO
+        # (can use self.filtered_df)
+        # check if the 'consequent' values matches self.additional_preference
+        return
     
     def rule_based_model_get_label(self):
         """
@@ -470,12 +505,66 @@ class RestaurantRecommendationSystem:
             else:
                 print("I found ", len(self.possible_restaurants), " restaurants based on your preferences.")
 
+             # ADDED
+            print("Do you have additional requirements?")
+            self.user_input = input(">>").lower()
+
+            dialog_act = self.dialog_act_prediction()
+            print("dialog act: ", dialog_act)
+
+            if dialog_act not in ("negate","deny"):
+                return self.ADDITIONAL_PREFERENCES_STATE
+            
             print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
             
             self.user_input = input(">>").lower()
 
             return self.found_restaurant_for_recommendation()
+    
+    # ADDED
+    def additional_preferences_handler(self):
+        # Extract preferences from user input
+        self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
+        
+        # If no additional preference was extracted from user input
+        if self.additional_preference is None:
+            print("What is your additional preference?")
+            while self.additional_preference is None:
+                self.user_input = input(">>").lower()
+
+                dialog_act = self.dialog_act_prediction()
+                print(f"Dialog act: {dialog_act}")
+
+                self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
+
+                if self.additional_preference is None:
+                    print("Please give a valid additional preference.")
+            return
+    
+        # Additional preference has been extracted
+
+        # Get matching restaurants taking additional preferences into account
+        self.possible_restaurants = self.get_matching_restaurants_with_additional_preference()
+
+        # If there are no matching restaurants
+        if (len(self.possible_restaurants)) == 0:
+            print(f"I found no restaurant based on your preferences. Do you want something else?")
+            self.user_input = input(">>").lower()
+            return self.NO_MORE_RECOMMENDATIONS_STATE
+        
+        # If there are matching restaurants
+        else:
+            if (len(self.possible_restaurants)) == 1:
+                print("I found ", len(self.possible_restaurants), " restaurant based on your additional preferences.")
+            else:
+                print("I found ", len(self.possible_restaurants), " restaurants based on your additional preferences.")
+
+            print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
             
+            self.user_input = input(">>").lower()
+
+            return self.found_restaurant_for_recommendation()
+    
     def no_more_recommendations_handler(self):
         """
         Handles scenario where no more restaurants match the user's preferences. 
@@ -595,7 +684,12 @@ class RestaurantRecommendationSystem:
 
         elif self.state == self.RECOMMEND_STATE:
             self.state = self.recommend_handler()
-            return 
+            return
+        
+        # ADDED
+        elif self.state == self.ADDITIONAL_PREFERENCES_STATE:
+            self.state = self.additional_preferences_handler()
+            return
         
         elif self.state == self.NO_MORE_RECOMMENDATIONS_STATE:
             self.state = self.no_more_recommendations_handler()
