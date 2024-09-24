@@ -96,6 +96,7 @@ class RestaurantRecommendationSystem:
 
         # Read restaurant data
         self.df = pd.read_csv(self.DATA_FILE)
+        self.filtered_df = pd.DataFrame()
 
         # TO DO
         # add additional columns to df with random values
@@ -266,19 +267,19 @@ class RestaurantRecommendationSystem:
         
         """
 
-        filtered_df = self.df.copy()
+        self.filtered_df = self.df.copy()
 
         if self.food_preference != "any":
-            filtered_df = filtered_df[filtered_df["food"] == self.food_preference]
+            self.filtered_df = self.filtered_df[self.filtered_df["food"] == self.food_preference]
         
         if self.price_preference != "any":
-            filtered_df = filtered_df[filtered_df["pricerange"] == self.price_preference]
+            self.filtered_df = self.filtered_df[self.filtered_df["pricerange"] == self.price_preference]
         
         if self.area_preference != "any":
-            filtered_df = filtered_df[filtered_df["area"] == self.area_preference]
+            self.filtered_df = self.filtered_df[self.filtered_df["area"] == self.area_preference]
 
-        if not filtered_df.empty:
-            self.possible_restaurants = filtered_df.to_dict(orient='records')
+        if not self.filtered_df.empty:
+            self.possible_restaurants = self.filtered_df.to_dict(orient='records')
             return self.possible_restaurants
         else:
             return []
