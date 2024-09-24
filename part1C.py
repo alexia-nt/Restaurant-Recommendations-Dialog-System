@@ -1,6 +1,7 @@
 import pandas as pd
 import Levenshtein
 import pickle
+import random
 
 LR_MODEL_PREFERENCE = 1
 DT_MODEL_PREFERENCE = 2
@@ -96,9 +97,33 @@ class RestaurantRecommendationSystem:
 
         # Read restaurant data
         self.df = pd.read_csv(self.DATA_FILE)
+        self.filtered_df = pd.DataFrame()
+        
+        # create a dataframe containing the new categories and their randomized values
+        # first we need the length of the original dataframe
+        self.dataframe_length = len(self.df.index)
 
-        # TO DO
-        # add additional columns to df with random values
+        # now we create the sorted lists with the new values
+        self.list_foodquality = ['good'] * (self.dataframe_length//2) + ['bad'] * (self.dataframe_length - self.dataframe_length//2)
+        self.list_crowdedness = ['busy'] * (self.dataframe_length//2) + ['quiet'] * (self.dataframe_length - self.dataframe_length//2)
+        self.list_lengthofstay = ['short'] * (self.dataframe_length//2) + ['long'] * (self.dataframe_length - self.dataframe_length//2)
+        
+        # we randomize the lists of new values
+        random.shuffle(self.list_foodquality)
+        random.shuffle(self.list_crowdedness)
+        random.shuffle(self.list_lengthofstay)
+
+        # we create a new dataframe consisting of three columns, each with a name and a corresponding 
+        # randomized list
+        self.extra_categories_data = {'foodquality': self.list_foodquality,
+                                      'crowdedness': self.list_crowdedness,
+                                      'lengthofstay': self.list_lengthofstay}
+        self.extra_categories_df = pd.DataFrame(self.extra_categories_data)
+
+        # now we join the two dataframes together
+        self.complete_df = self.df.join(self.extra_categories_df)
+        # we create a new csv file from the updated dataframe
+        self.complete_df.to_csv('restaurant_complete_info.csv', sep='\t', encoding='utf-8', index=False, header=True)
 
         # 1. food quality (good food / bad food)
         # 2. crowdedness (busy / quiet)
@@ -266,19 +291,19 @@ class RestaurantRecommendationSystem:
         
         """
 
-        filtered_df = self.df.copy()
+        self.filtered_df = self.df.copy()
 
         if self.food_preference != "any":
-            filtered_df = filtered_df[filtered_df["food"] == self.food_preference]
+            self.filtered_df = self.filtered_df[self.filtered_df["food"] == self.food_preference]
         
         if self.price_preference != "any":
-            filtered_df = filtered_df[filtered_df["pricerange"] == self.price_preference]
+            self.filtered_df = self.filtered_df[self.filtered_df["pricerange"] == self.price_preference]
         
         if self.area_preference != "any":
-            filtered_df = filtered_df[filtered_df["area"] == self.area_preference]
+            self.filtered_df = self.filtered_df[self.filtered_df["area"] == self.area_preference]
 
-        if not filtered_df.empty:
-            self.possible_restaurants = filtered_df.to_dict(orient='records')
+        if not self.filtered_df.empty:
+            self.possible_restaurants = self.filtered_df.to_dict(orient='records')
             return self.possible_restaurants
         else:
             return []
