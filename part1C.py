@@ -110,8 +110,8 @@ class RestaurantRecommendationSystem:
         # 6. children
         # 7. romantic
 
-        # The initial values for the 'consequent' columns should be False.
-        # The values for this column can become True from inference if the user has additional preferences.
+        # The initial values for the 'consequent' columns should be "0".
+        # The values for this column can become "1" from inference if the user has additional preferences.
 
         # Extract keywords for preferences
         self.food_keywords, self.price_keywords, self.area_keywords = self.get_keywords()
