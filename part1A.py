@@ -289,13 +289,13 @@ if __name__ == "__main__":
 
     # Split the data into features (utterances) and labels
     X_dup = df['utterance']
-    X_dup = df['label']
+    y_dup = df['label']
     X_no_dup = df_no_dup['utterance']
-    X_no_dup = df_no_dup['label']
+    y_no_dup = df_no_dup['label']
 
     # Split the data into training and testing sets
-    X_dup_train, X_dup_test, y_dup_train, y_dup_test = train_test_split(X_dup, X_dup, test_size=0.15, random_state=42)
-    X_no_dup_train, X_no_dup_test, y_no_dup_train, y_no_dup_test = train_test_split(X_no_dup, X_no_dup, test_size=0.15, random_state=42)
+    X_dup_train, X_dup_test, y_dup_train, y_dup_test = train_test_split(X_dup, y_dup, test_size=0.15, random_state=42)
+    X_no_dup_train, X_no_dup_test, y_no_dup_train, y_no_dup_test = train_test_split(X_no_dup, y_no_dup, test_size=0.15, random_state=42)
 
     # Make predictions on original data for DT and LR
     DT_model, LR_model, vectorizer = train_DT_LR(X_dup_train, y_dup_train)
