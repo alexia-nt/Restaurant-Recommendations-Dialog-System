@@ -1,6 +1,10 @@
 import pandas as pd
 import Levenshtein
-import pickle
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
 
 LR_MODEL_PREFERENCE = 1
 DT_MODEL_PREFERENCE = 2
@@ -35,6 +39,7 @@ class RestaurantRecommendationSystem:
     """
 
     DATA_FILE = "data/restaurant_info.csv"
+    DIALOG_ACTS_FILE = "data/dialog_acts.dat"
     DT_FILE = "models/dt_model.pkl"
     LR_FILE = "models/lr_model.pkl"
     VECTORIZER_FILE = "models/vectorizer.pkl"
@@ -115,20 +120,10 @@ class RestaurantRecommendationSystem:
         self.model_preference = model_preference
         
         if(self.model_preference == LR_MODEL_PREFERENCE):
-            # Load LR model
-            with open(self.LR_FILE,'rb') as file:
-                self.LR_model = pickle.load(file)
-            # Load vectorizer
-            with open(self.VECTORIZER_FILE,'rb') as file:
-                self.vectorizer = pickle.load(file)
+            self.LR_model, self.vectorizer = self.train_LR()
 
         elif(self.model_preference == DT_MODEL_PREFERENCE):
-            # Load DT model
-            with open(self.DT_FILE,'rb') as file:
-                self.DT_model = pickle.load(file)
-            # Load vectorizer
-            with open(self.VECTORIZER_FILE,'rb') as file:
-                self.vectorizer = pickle.load(file)
+            self.DT_model, self.vectorizer = self.train_DT()
 
     def get_keywords(self):
         """
@@ -148,6 +143,63 @@ class RestaurantRecommendationSystem:
         area_keywords = list(self.df["area"].dropna().astype(str).unique())
         return food_keywords, price_keywords, area_keywords
 
+    def create_dataframe(self, data_file):
+        """
+        Creates a Pandas DataFrame from the given data file.
+
+        Args:
+            data_file: The path of the data file.
+
+        Returns:
+            df: A DataFrame with two columns: 'label' and 'utterance'.
+        """
+
+        labels = []
+        utterances = []
+
+        with open(data_file, 'r') as file:
+            for line in file:
+                label, utterance = line.split(maxsplit=1)
+                labels.append(label.lower())
+                utterances.append(utterance.lower())
+
+        data_dict = {'label': labels, 'utterance': utterances}
+        df = pd.DataFrame(data_dict)
+
+        return df
+
+    def train_LR(self):
+        df_dialog_acts = self.create_dataframe(self.DIALOG_ACTS_FILE)
+
+        X = df_dialog_acts['utterance']
+        y = df_dialog_acts['label']
+        X_train, _, y_train, _ = train_test_split(X, y, test_size=0.15, random_state=42)
+
+        vectorizer = CountVectorizer()
+        X_bow_train = vectorizer.fit_transform(X_train)
+
+        # Train Logistic Regression model
+        LR_model = LogisticRegression(max_iter=400)
+        LR_model.fit(X_bow_train, y_train)
+
+        return LR_model, vectorizer
+    
+    def train_DT(self):
+        df_dialog_acts = self.create_dataframe(self.DIALOG_ACTS_FILE)
+
+        X = df_dialog_acts['utterance']
+        y = df_dialog_acts['label']
+        X_train, _, y_train, _ = train_test_split(X, y, test_size=0.15, random_state=42)
+
+        vectorizer = CountVectorizer()
+        X_bow_train = vectorizer.fit_transform(X_train)
+        
+        # Train Decision-Tree model
+        DT_model = DecisionTreeClassifier()
+        DT_model.fit(X_bow_train, y_train)
+
+        return DT_model, vectorizer
+    
     def extract_specific_preferences(self, utterance, keywords):
         """
         Extracts user preferences other than 'any' from 
@@ -307,7 +359,7 @@ class RestaurantRecommendationSystem:
         if(self.model_preference == LR_MODEL_PREFERENCE):
             return self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
         elif(self.model_preference == DT_MODEL_PREFERENCE):
-            return self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            return self.DT_model.predict(self.vectorizer.transform([self.user_input]))[0]
         else:
             return self.rule_based_model_get_label()
 
@@ -427,6 +479,7 @@ class RestaurantRecommendationSystem:
         """
 
         dialog_act = self.dialog_act_prediction()
+        print("Dialog act: ", dialog_act)
 
         # If dialog act is bye, ack, or affirm, go to the "end" state
         if dialog_act in ("bye", "ack", "affirm"):
@@ -490,6 +543,7 @@ class RestaurantRecommendationSystem:
 
         # Predict dialog act
         dialog_act = self.dialog_act_prediction()
+        print("Dialog act: ", dialog_act)
 
         # If dialog act is bye, negate or deny, go to "end" state
         if dialog_act in ("bye","negate","deny"):
@@ -551,6 +605,7 @@ class RestaurantRecommendationSystem:
 
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
+        print("Dialog act: ", dialog_act)
 
         # If dialog act is bye, ack, or affirm, go to the "end" state
         if dialog_act in ("bye", "ack", "affirm"):

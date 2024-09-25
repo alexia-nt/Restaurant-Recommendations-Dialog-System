@@ -375,7 +375,7 @@ class RestaurantRecommendationSystem:
         if(self.model_preference == LR_MODEL_PREFERENCE):
             return self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
         elif(self.model_preference == DT_MODEL_PREFERENCE):
-            return self.LR_model.predict(self.vectorizer.transform([self.user_input]))[0]
+            return self.DT_model.predict(self.vectorizer.transform([self.user_input]))[0]
         else:
             return self.rule_based_model_get_label()
 
