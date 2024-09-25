@@ -122,8 +122,8 @@ class RestaurantRecommendationSystem:
 
         # now we join the two dataframes together
         self.complete_df = self.df.join(self.extra_categories_df)
-        # we create a new csv file from the updated dataframe
-        self.complete_df.to_csv('restaurant_complete_info.csv', sep='\t', encoding='utf-8', index=False, header=True)
+        # we created a new csv file from the updated dataframe
+        # self.complete_df.to_csv('restaurant_complete_info.csv', sep='\t', encoding='utf-8', index=False, header=True)
 
         # 1. food quality (good food / bad food)
         # 2. crowdedness (busy / quiet)
