@@ -98,7 +98,7 @@ class RestaurantRecommendationSystem:
         # Read restaurant data
         self.df = pd.read_csv(self.DATA_FILE)
         self.filtered_df = pd.DataFrame()
-        
+
         # create a dataframe containing the new categories and their randomized values
         # first we need the length of the original dataframe
         self.dataframe_length = len(self.df.index)
