@@ -493,7 +493,7 @@ class RestaurantRecommendationSystem:
         else:
             return self.SEARCH_MORE_STATE
         
-    def recommend_handler(self):
+    def search_handler(self):
         """
         Handles the restaurant recommendation process. Returns first restaurant of
         list of matched restaurants with user input. If no matches are found, it
@@ -557,7 +557,7 @@ class RestaurantRecommendationSystem:
             self.area_preference = None
             return self.ASK_INITIAL_PREFERENCES_STATE
                         
-    def recommend_more_handler(self):
+    def search_more_handler(self):
         """
         Handles process of recommending additional restaurants if multiple matching 
         restaurants were found. 
@@ -649,7 +649,7 @@ class RestaurantRecommendationSystem:
             return
 
         elif self.state == self.SEARCH_STATE:
-            self.state = self.recommend_handler()
+            self.state = self.search_handler()
             return 
         
         elif self.state == self.NO_MORE_RECOMMENDATIONS_STATE:
@@ -657,7 +657,7 @@ class RestaurantRecommendationSystem:
             return
 
         elif self.state == self.SEARCH_MORE_STATE:
-            self.state = self.recommend_more_handler()
+            self.state = self.search_more_handler()
             return
 
         elif self.state == self.GIVE_DETAILS_STATE:
