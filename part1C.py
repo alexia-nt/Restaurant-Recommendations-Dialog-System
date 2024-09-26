@@ -120,10 +120,15 @@ class RestaurantRecommendationSystem:
                                       'lengthofstay': self.list_lengthofstay}
         self.extra_categories_df = pd.DataFrame(self.extra_categories_data)
 
+        self.extra_categories_df['touristic'] = 0
+        self.extra_categories_df['assignedseats'] = 0
+        self.extra_categories_df['childres'] = 0
+        self.extra_categories_df['romantic'] = 0
+
         # now we join the two dataframes together
         self.complete_df = self.df.join(self.extra_categories_df)
         # we created a new csv file from the updated dataframe
-        # self.complete_df.to_csv('restaurant_complete_info.csv', sep='\t', encoding='utf-8', index=False, header=True)
+        self.complete_df.to_csv('data/restaurant_complete_info.csv', encoding='utf-8', index=False, header=True)
 
         # 1. food quality (good food / bad food)
         # 2. crowdedness (busy / quiet)
