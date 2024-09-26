@@ -130,7 +130,7 @@ class RestaurantRecommendationSystem:
 
         self.extra_categories_df['touristic'] = 0
         self.extra_categories_df['assignedseats'] = 0
-        self.extra_categories_df['childres'] = 0
+        self.extra_categories_df['children'] = 1
         self.extra_categories_df['romantic'] = 0
 
         # now we join the two dataframes together
@@ -288,9 +288,27 @@ class RestaurantRecommendationSystem:
     
     # ADDED
     def run_inference(self):
-        # TO DO
-        # use self.possible_restaurants
-        return
+        for index, row in self.filtered_df.iterrows():
+            # Check for "cheap" and "good food"
+            if (row["pricerange"] == "cheap") and (row["foodquality"] == "good"):
+                self.filtered_df.loc[index, "touristic"] = 1
+
+            # Check for "romanian"
+            if row["food"] == "romanian":
+                self.filtered_df.loc[index, "touristic"] = 0
+
+            # Check for "long stay"
+            if row["lengthofstay"] == "long":
+                self.filtered_df.loc[index, "children"] = 0
+                self.filtered_df.loc[index, "romantic"] = 1
+
+            # Check for "busy"
+            if row["crowdedness"] == "busy":
+                self.filtered_df.loc[index, "assignedseats"] = 1
+                self.filtered_df.loc[index, "romantic"] = 0
+
+        print(self.filtered_df)
+
     
     def get_matching_restaurants(self):
         """
@@ -349,10 +367,20 @@ class RestaurantRecommendationSystem:
         # Run inference to assign values to the 'consequent' column for the possible restaurants
         self.run_inference()
 
-        # TO DO
-        # (can use self.filtered_df)
-        # check if the 'consequent' values matches self.additional_preference
-        return
+        if self.additional_preference == "touristic":
+            #Filter the restaurants based on the additional preference
+            self.filtered_df = self.filtered_df[self.filtered_df['touristic'] == 1]
+        elif self.additional_preference == "assigned seats":
+            #Filter the restaurants based on the additional preference
+            self.filtered_df = self.filtered_df[self.filtered_df['assignedseats'] == 1]
+        elif self.additional_preference == "children":
+            #Filter the restaurants based on the additional preference
+            self.filtered_df = self.filtered_df[self.filtered_df['children'] == 1]
+        elif self.additional_preference == "romantic":
+            #Filter the restaurants based on the additional preference
+            self.filtered_df = self.filtered_df[self.filtered_df['romantic'] == 1]
+        print(self.filtered_df)
+        return self.filtered_df.to_dict(orient='records')
     
     def rule_based_model_get_label(self):
         """
