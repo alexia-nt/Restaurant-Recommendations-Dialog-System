@@ -122,13 +122,15 @@ class RestaurantRecommendationSystem:
 
         self.extra_categories_df['touristic'] = 0
         self.extra_categories_df['assignedseats'] = 0
-        self.extra_categories_df['childres'] = 0
+        self.extra_categories_df['children'] = 0
         self.extra_categories_df['romantic'] = 0
 
         # now we join the two dataframes together
         self.complete_df = self.df.join(self.extra_categories_df)
         # we created a new csv file from the updated dataframe
         self.complete_df.to_csv('data/restaurant_complete_info.csv', encoding='utf-8', index=False, header=True)
+
+        self.df = self.complete_df.copy()
 
         # 1. food quality (good food / bad food)
         # 2. crowdedness (busy / quiet)
@@ -294,9 +296,29 @@ class RestaurantRecommendationSystem:
     # ADDED
     def run_inference(self):
         # TO DO
-        # use self.possible_restaurants
-        return
-    
+        # use self.filtered_df
+
+        for index, row in self.filtered_df.iterrows():
+            # Check for "cheap" and "good food"
+            if (row["pricerange"] == "cheap") and (row["foodquality"] == "good"):
+                self.filtered_df.loc[index, "touristic"] = 1
+
+            # Check for "romanian"
+            if row["food"] == "romanian":
+                self.filtered_df.loc[index, "touristic"] = 0
+            
+            # Check for "long stay"
+            if row["lengthofstay"] == "long":
+                self.filtered_df.loc[index, "children"] = 0
+                self.filtered_df.loc[index, "romantic"] = 1
+
+            # Check for "busy"
+            if row["crowdedness"] == "busy":
+                self.filtered_df.loc[index, "assignedseats"] = 1
+                self.filtered_df.loc[index, "romantic"] = 0
+
+        print(self.filtered_df)
+
     def get_matching_restaurants(self):
         """
         Filters the restaurant dataset based on user
@@ -350,13 +372,14 @@ class RestaurantRecommendationSystem:
     
     # ADDED
     def get_matching_restaurants_with_additional_preference(self):
+        print("got in")
         # Run inference to assign values to the 'consequent' column for the possible restaurants
         self.run_inference()
 
         # TO DO
         # (can use self.filtered_df)
         # check if the 'consequent' values matches self.additional_preference
-        return
+        return []
     
     def rule_based_model_get_label(self):
         """
@@ -578,7 +601,6 @@ class RestaurantRecommendationSystem:
     def additional_preferences_handler(self):
         # Extract preferences from user input
         self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
-        print("Extracted additional preference: ", self.additional_preference)
         
         # If no additional preference was extracted from user input
         if self.additional_preference is None:
@@ -586,20 +608,21 @@ class RestaurantRecommendationSystem:
             while self.additional_preference is None:
                 self.user_input = input(">>").lower()
 
-                dialog_act = self.dialog_act_prediction()
-                print("Dialog act: ", dialog_act)
+                # dialog_act = self.dialog_act_prediction()
+                # print("Dialog act: ", dialog_act)
 
                 self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
-                print("Extracted additional preference: ", self.additional_preference)
 
                 if self.additional_preference is None:
                     print("Please give a valid additional preference.")
-            return
     
         # Additional preference has been extracted
+        print("Extracted additional preference: ", self.additional_preference)
 
         # Get matching restaurants taking additional preferences into account
         self.possible_restaurants = self.get_matching_restaurants_with_additional_preference()
+
+        print("continue")
 
         # If there are no matching restaurants
         if (len(self.possible_restaurants)) == 0:
