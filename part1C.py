@@ -379,6 +379,7 @@ class RestaurantRecommendationSystem:
         return None
     
     # ADDED
+    # extracting the consequent from the dataframe
     def run_inference(self):
         for index, row in self.filtered_df.iterrows():
             # Check for "cheap" and "good food"

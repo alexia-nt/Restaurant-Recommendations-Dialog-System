@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -266,6 +267,19 @@ def print_menu():
     print("1. Print evaluation metrics")
     print("2. Give an utterance for prediction")
     print("3. Exit")
+
+def generate_barplot(df):
+    # df_counted = df.groupby(['label'])['label'].count().reset_index(name='count')
+    # df.plot.pie(y='label', figsize=(10, 10))
+    # df.label.value_counts().plot(kind='bar', xlabel='Label', ylabel='Count', title='Distribution of dialog act labels in original dataset')
+    count = df['utterance'].str.split().str.len()
+    count.index = count.index.astype(str) + ' words:'
+    # count.sort_index(inplace=True)
+    count.value_counts().plot(logy=True, kind='bar', color='green', title='Distribution of # words per utterance of original dataset')
+    plt.xlabel('# words in utterance', labelpad=12)
+    plt.ylabel('Count')
+    plt.show()
+
 
 if __name__ == "__main__":
     # Load the data into a DataFrame
