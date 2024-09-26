@@ -2,6 +2,7 @@ import pandas as pd
 import Levenshtein
 import pickle
 import random
+import time
 
 LR_MODEL_PREFERENCE = 1
 DT_MODEL_PREFERENCE = 2
@@ -21,6 +22,9 @@ class RestaurantRecommendationSystem:
         1 for Logistic Regression model
         2 for Decision Tree model
         3 for Rule-Based model
+    - delay preference (int): reflects delay choice of user:
+        0 for no delay
+        1 for delay
 
     Constants
     ---------
@@ -84,7 +88,7 @@ class RestaurantRecommendationSystem:
 
     ADDITIONAL_PREFERENCES_KEYWORDS = ["touristic", "assigned seats", "children", "romantic"]
 
-    def __init__(self, model_preference):
+    def __init__(self, model_preference, delay_preference):
         """
         Parameters
         ----------
@@ -92,6 +96,10 @@ class RestaurantRecommendationSystem:
         1 for Logistic Regression model
         2 for Decision Tree model
         3 for Rule-Based model
+
+        - delay preference (int): reflects delay choice of user:
+        0 for no delay
+        1 for delay
 
         """
 
@@ -165,6 +173,7 @@ class RestaurantRecommendationSystem:
         self.levenshtein_threshold = 1
 
         self.model_preference = model_preference
+        self.delay_preference = delay_preference
         
         if(self.model_preference == LR_MODEL_PREFERENCE):
             # Load LR model
@@ -318,6 +327,7 @@ class RestaurantRecommendationSystem:
         Prints the available details for the recommended restaurant.
         
         """
+        time.sleep(self.delay_preference)
         print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant:")
         if(pd.isna(self.possible_restaurants[0]['phone'])):
             print("I don't have an available phone number.")
@@ -435,7 +445,8 @@ class RestaurantRecommendationSystem:
 
         if self.food_preference is not None:
             return
-
+        
+        time.sleep(self.delay_preference)
         print("What kind of food would you like?")
         while self.food_preference is None:
             self.user_input = input(">>").lower()            
@@ -455,7 +466,8 @@ class RestaurantRecommendationSystem:
 
         if self.price_preference is not None:
             return
-
+        
+        time.sleep(self.delay_preference)
         print("What price range do you want?")
         while self.price_preference is None:
             self.user_input = input(">>").lower()
@@ -463,6 +475,7 @@ class RestaurantRecommendationSystem:
             self.price_preference = self.extract_preferences(self.user_input, self.price_keywords)
 
             if self.price_preference is None:
+                time.sleep(self.delay_preference)
                 print("Please give a valid price preference.")
         return
 
@@ -475,7 +488,8 @@ class RestaurantRecommendationSystem:
 
         if self.area_preference is not None:
             return
-
+        
+        time.sleep(self.delay_preference)
         print("What part of town do you have in mind?")
         while self.area_preference is None:
             self.user_input = input(">>").lower()
@@ -483,6 +497,7 @@ class RestaurantRecommendationSystem:
             self.area_preference = self.extract_preferences(self.user_input, self.area_keywords)
 
             if self.area_preference is None:
+                time.sleep(self.delay_preference)
                 print("Please give a valid area preference.")
         return
 
@@ -526,7 +541,7 @@ class RestaurantRecommendationSystem:
         RECOMMEND_MORE)
         
         """
-
+        time.sleep(self.delay_preference)
         print(f"Ok, I am searching for a restaurant based on the following preferences: {self.food_preference} restaurant at {self.price_preference} price in {self.area_preference} area...")
         
         self.possible_restaurants = self.get_matching_restaurants()
@@ -567,6 +582,7 @@ class RestaurantRecommendationSystem:
         
         # If no additional preference was extracted from user input
         if self.additional_preference is None:
+            time.sleep(self.delay_preference)
             print("What is your additional preference?")
             while self.additional_preference is None:
                 self.user_input = input(">>").lower()
@@ -577,6 +593,7 @@ class RestaurantRecommendationSystem:
                 self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
 
                 if self.additional_preference is None:
+                    time.sleep(self.delay_preference)
                     print("Please give a valid additional preference.")
             return
     
@@ -587,6 +604,7 @@ class RestaurantRecommendationSystem:
 
         # If there are no matching restaurants
         if (len(self.possible_restaurants)) == 0:
+            time.sleep(self.delay_preference)
             print(f"I found no restaurant based on your preferences. Do you want something else?")
             self.user_input = input(">>").lower()
             return self.NO_MORE_RECOMMENDATIONS_STATE
@@ -594,8 +612,10 @@ class RestaurantRecommendationSystem:
         # If there are matching restaurants
         else:
             if (len(self.possible_restaurants)) == 1:
+                time.sleep(self.delay_preference)
                 print("I found ", len(self.possible_restaurants), " restaurant based on your additional preferences.")
             else:
+                time.sleep(self.delay_preference)
                 print("I found ", len(self.possible_restaurants), " restaurants based on your additional preferences.")
 
             print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
@@ -652,6 +672,7 @@ class RestaurantRecommendationSystem:
             self.possible_restaurants.pop(0)
 
             # Recommend the first restaurant in the list
+            time.sleep(self.delay_preference)
             print(f"{self.possible_restaurants[0]['restaurantname']} is another nice restaurant serving {self.possible_restaurants[0]['food']} food.")
 
             # Get user input and predict dialog act
@@ -661,6 +682,7 @@ class RestaurantRecommendationSystem:
         
         # If there are no more restaurants to recommend
         else:
+            time.sleep(self.delay_preference)
             print("There are no more restaurants to recommend. Do you want something else?")
             self.user_input = input(">>").lower()
             return self.NO_MORE_RECOMMENDATIONS_STATE
@@ -754,10 +776,11 @@ class RestaurantRecommendationSystem:
 
         while self.state != self.END_STATE:
             self.handle_transition()
-        
+
+        time.sleep(self.delay_preference)
         print("I hope I was helpful, goodbye!")
 
-def print_menu():
+def print_model_config():
     """
     Prints menu with the three classification models (RB, RL, DT)  
     so the user can choose a model for dialog act classification.
@@ -769,33 +792,58 @@ def print_menu():
     print("2. Decision Tree Model")
     print("3. Rule Based Model")
 
+def print_delay_config():
+    print("Do you want a short delay before showing system responses?")
+    print("0. No")
+    print("1. Yes")
+
 # Create an instance and run the system
 if __name__ == "__main__":
     # Display the menu
-    print_menu()
+    print_model_config()
 
     # Get input from the user
-    choice = input("\nEnter your choice (1/2/3).\n>>").strip()
+    model_choice = input("\nEnter your choice (1/2/3).\n>>").strip()
 
     while True:
         
-        if(choice == '1'):
+        if(model_choice == '1'):
             model_preference = LR_MODEL_PREFERENCE
             break
-        elif(choice == '2'):
+        elif(model_choice == '2'):
             model_preference = DT_MODEL_PREFERENCE
             break
-        elif(choice == '3'):
+        elif(model_choice == '3'):
             model_preference = RULE_BASED_MODEL_PREFERENCE
             break
         
         else:
             # Display the menu
-            print_menu()
+            print_model_config()
 
             # Get input from the user
-            choice = input("\nInvalid choice. Please select a valid option (1/2/3).\n>>")
+            model_choice = input("\nInvalid choice. Please select a valid option (1/2/3).\n>>")
+    
+
+    print_delay_config()
+
+    delay_choice = input("\nEnter your choice (0/1).\n>>").strip()
+    while True:
+        
+        if(delay_choice == '0'):
+            delay_preference = 0
+            break
+        elif(delay_choice == '1'):
+            delay_preference = 2
+            break
+        
+        else:
+            # Display the menu
+            print_delay_config()
+
+            # Get input from the user
+            delay_choice = input("\nInvalid choice. Please select a valid option (0/1).\n>>")
 
     print("\nStarting conversation...\n")
-    system = RestaurantRecommendationSystem(model_preference)
+    system = RestaurantRecommendationSystem(model_preference, delay_preference)
     system.run()
