@@ -6,7 +6,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
-import pickle
 
 DATA_FILE = 'data/dialog_acts.dat'
 
@@ -97,25 +96,27 @@ def rule_based_model_get_label(utterance):
         predicted_label: The predicted label.
     """
 
-    # The labels in the dictionary are ordered based on the frequency of the labels in the dataset.
-    # This will prioritize checking the more frequent labels first, which could lead to better performance.
-
     rules = {
-        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
-        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search'],
-        'thankyou': ['thank', 'thanks', 'appreciate', 'grateful', 'thank you', 'many thanks', 'thankful'],
-        'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
-        'null': ['cough', 'noise', 'laugh', 'uh', 'um', 'background', 'incoherent'],
-        'affirm': ['yes', 'yeah', 'right', 'correct', 'sure', 'absolutely', 'definitely', 'of course', 'affirm', 'indeed'],
-        'negate': ['no', 'not', 'don\'t', 'nope', 'none', 'wrong', 'never', 'incorrect'],
-        'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later', 'take care', 'talk to you soon'],
-        'confirm': ['confirm', 'is it', 'check if', 'right?', 'verify', 'am i correct', 'confirming', 'confirmation', 'can you confirm'],
         'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
-        'repeat': ['repeat', 'again', 'say again', 'can you repeat', 'could you repeat', 'pardon'],
-        'ack': ['okay', 'um', 'uh-huh', 'got it', 'alright', 'fine', 'ok', 'acknowledge'],
+        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
+
+        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search', 'detail'],
+        'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further'],
+        'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
+
+        'negate': ['no', 'not', 'don\'t', 'nope', 'none', 'wrong', 'never', 'incorrect'],
         'deny': ['dont want', 'don\'t want', 'reject', 'not that', 'no thanks', 'not interested', 'decline', 'denying'],
+        'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later', 'take care', 'talk to you soon'],
+
+        'ack': ['okay', 'um', 'uh-huh', 'got it', 'alright', 'fine', 'ok', 'acknowledge'],
+        'confirm': ['confirm', 'is it', 'check if', 'right?', 'verify', 'am i correct', 'confirming', 'confirmation', 'can you confirm'],
+        'affirm': ['yes', 'yeah', 'right', 'correct', 'sure', 'absolutely', 'definitely', 'of course', 'affirm', 'indeed'],
+        'thankyou': ['thank', 'thanks', 'appreciate', 'grateful', 'thank you', 'many thanks', 'thankful'],
+
+        'repeat': ['repeat', 'again', 'say again', 'can you repeat', 'could you repeat', 'pardon'],
         'restart': ['restart', 'start over', 'begin again', 'reset', 'new', 'begin anew'],
-        'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further']
+
+        'null': ['cough', 'noise', 'laugh', 'uh', 'um', 'background', 'incoherent']
     }
 
     for label, keywords in rules.items():
@@ -152,20 +153,6 @@ def train_DT_LR(X_train, y_train):
     # Train Logistic Regression model
     LR_model = LogisticRegression(max_iter=400)
     LR_model.fit(X_bow_train, y_train)
-
-    # Create the 'models' directory if it doesn't exist
-    models_dir = "models"
-    os.makedirs(models_dir, exist_ok=True)
-
-    # Save the models and vectorizer in the 'models' directory
-    with open(os.path.join(models_dir, 'dt_model.pkl'), 'wb') as f:
-        pickle.dump(DT_model, f)
-
-    with open(os.path.join(models_dir, 'lr_model.pkl'), 'wb') as f:
-        pickle.dump(LR_model, f)
-
-    with open(os.path.join(models_dir, 'vectorizer.pkl'), 'wb') as f:
-        pickle.dump(vectorizer, f)
 
     return DT_model, LR_model, vectorizer
 
