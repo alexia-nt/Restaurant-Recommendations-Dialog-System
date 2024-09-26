@@ -89,7 +89,7 @@ class RestaurantRecommendationSystem:
 
     ADDITIONAL_PREFERENCES_KEYWORDS = ["touristic", "assigned seats", "children", "romantic"]
 
-    def __init__(self, model_preference):
+    def __init__(self, model_preference, levenshtein_preference):
         """
         Parameters
         ----------
@@ -126,7 +126,7 @@ class RestaurantRecommendationSystem:
         self.additional_preference = None
 
         self.possible_restaurants = []
-        self.levenshtein_threshold = 1
+        self.levenshtein_threshold = levenshtein_preference
 
         self.model_preference = model_preference
         
@@ -230,6 +230,12 @@ class RestaurantRecommendationSystem:
         
         utterance_words = utterance.lower().split()
         
+        
+        # If the Levenshtein threshold is set to 0 return 
+        if self.levenshtein_threshold == 0:
+            return None
+        
+        # Search for preference matches with Levenshtein distance
         for word in utterance_words:
             # If the word from user utterance is "want", do not check levenshtein distance,
             # because it would be matched as "west" area preference for threshold >=2
@@ -243,6 +249,8 @@ class RestaurantRecommendationSystem:
                 distance = Levenshtein.distance(word.lower(), keyword.lower())
                 if distance <= self.levenshtein_threshold:  # Adjust threshold as needed
                     return keyword
+        
+        # If no preference matches were found with Levenshtein distance return None
         return None
     
     def create_dataframe(self, data_file):
@@ -338,7 +346,12 @@ class RestaurantRecommendationSystem:
                 return keyword
         
         utterance_words = utterance.lower().split()
+
+        # If the Levenshtein threshold is set to 0 return 
+        if self.levenshtein_threshold == 0:
+            return None
         
+        # Search for preference matches with Levenshtein distance
         for word in utterance_words:
             for keyword in additional_preferences_keywords:
                 # Check if any word from the utterance matches part of a multi-word keyword
@@ -348,6 +361,8 @@ class RestaurantRecommendationSystem:
                 distance = Levenshtein.distance(word.lower(), keyword.lower())
                 if distance <= self.levenshtein_threshold:  # Adjust threshold as needed
                     return keyword
+        
+        # If no preference matches were found with Levenshtein distance return None
         return None
     
     # ADDED
@@ -862,7 +877,7 @@ class RestaurantRecommendationSystem:
         
         print("I hope I was helpful, goodbye!")
 
-def print_menu():
+def print_models_menu():
     """
     Prints menu with the three classification models (RB, RL, DT)  
     so the user can choose a model for dialog act classification.
@@ -874,13 +889,12 @@ def print_menu():
     print("2. Decision Tree Model")
     print("3. Rule Based Model")
 
-# Create an instance and run the system
-if __name__ == "__main__":
-    # Display the menu
-    print_menu()
+def get_model_preference():
+    # Display the models menu
+    print_models_menu()
 
     # Get input from the user
-    choice = input("\nEnter your choice (1/2/3).\n>>").strip()
+    choice = input("\nEnter your model choice (1/2/3).\n>>").strip()
 
     while True:
         
@@ -896,11 +910,36 @@ if __name__ == "__main__":
         
         else:
             # Display the menu
-            print_menu()
+            print_models_menu()
 
             # Get input from the user
             choice = input("\nInvalid choice. Please select a valid option (1/2/3).\n>>")
+    
+    return model_preference
 
+def get_levenshtein_preference():
+    # Get input from the user
+    levenshtein_input = input("\nSet Levenshtein distance threshold for preference extraction (Enter '1', '2', '3' or '0' to ignore Levenshtein distance).\n>>").strip()
+
+    while True:  
+        if(levenshtein_input in ('0','1','2','3')):
+            levenshtein_preference = int(levenshtein_input)
+            break
+        
+        else:
+            # Get input from the user
+            levenshtein_input = input("\nInvalid choice. Please enter a valid Levenshtein distance threshold (0/1/2/3).\n>>")
+    
+    return levenshtein_preference
+
+# Create an instance and run the system
+if __name__ == "__main__":
+    # Get model preference from user
+    model_preference = get_model_preference()
+
+    # Get levenshtein distance preference from user
+    levenshtein_preference = get_levenshtein_preference()
+    
     print("\nStarting conversation...\n")
-    system = RestaurantRecommendationSystem(model_preference)
+    system = RestaurantRecommendationSystem(model_preference, levenshtein_preference)
     system.run()
