@@ -99,51 +99,8 @@ class RestaurantRecommendationSystem:
         self.df = pd.read_csv(self.DATA_FILE)
         self.filtered_df = pd.DataFrame()
 
-        # create a dataframe containing the new categories and their randomized values
-        # first we need the length of the original dataframe
-        self.dataframe_length = len(self.df.index)
-
-        # now we create the sorted lists with the new values
-        self.list_foodquality = ['good'] * (self.dataframe_length//2) + ['bad'] * (self.dataframe_length - self.dataframe_length//2)
-        self.list_crowdedness = ['busy'] * (self.dataframe_length//2) + ['quiet'] * (self.dataframe_length - self.dataframe_length//2)
-        self.list_lengthofstay = ['short'] * (self.dataframe_length//2) + ['long'] * (self.dataframe_length - self.dataframe_length//2)
-        
-        # we randomize the lists of new values
-        random.shuffle(self.list_foodquality)
-        random.shuffle(self.list_crowdedness)
-        random.shuffle(self.list_lengthofstay)
-
-        # we create a new dataframe consisting of three columns, each with a name and a corresponding 
-        # randomized list
-        self.extra_categories_data = {'foodquality': self.list_foodquality,
-                                      'crowdedness': self.list_crowdedness,
-                                      'lengthofstay': self.list_lengthofstay}
-        self.extra_categories_df = pd.DataFrame(self.extra_categories_data)
-
-        self.extra_categories_df['touristic'] = 0
-        self.extra_categories_df['assignedseats'] = 0
-        self.extra_categories_df['children'] = 1
-        self.extra_categories_df['romantic'] = 0
-
-        # now we join the two dataframes together
-        self.complete_df = self.df.join(self.extra_categories_df)
-        # we created a new csv file from the updated dataframe
-        self.complete_df.to_csv('data/restaurant_complete_info.csv', encoding='utf-8', index=False, header=True)
-
-        self.df = self.complete_df.copy()
-
-        # 1. food quality (good food / bad food)
-        # 2. crowdedness (busy / quiet)
-        # 3. length of stay (long stay / short stay)
-
-        # Consequents
-        # 4. touristic
-        # 5. assigned seats
-        # 6. children
-        # 7. romantic
-
-        # The initial values for the 'consequent' columns should be "0".
-        # The values for this column can become "1" from inference if the user has additional preferences.
+        # Add additional column to the dataframe for additional preferences
+        self.add_additional_columns_to_df()
 
         # Extract keywords for preferences
         self.food_keywords, self.price_keywords, self.area_keywords = self.get_keywords()
@@ -184,6 +141,54 @@ class RestaurantRecommendationSystem:
             with open(self.VECTORIZER_FILE,'rb') as file:
                 self.vectorizer = pickle.load(file)
 
+    def add_additional_columns_to_df(self):
+        # Create a dataframe containing the new features and their randomized values
+
+        # First we need the length of the original dataframe
+        self.dataframe_length = len(self.df.index)
+
+        # New features
+        # 1. food quality (good / bad)
+        # 2. crowdedness (busy / quiet)
+        # 3. length of stay (long / short)
+
+        # Now we create the sorted lists with the new values
+        self.list_foodquality = ['good'] * (self.dataframe_length//2) + ['bad'] * (self.dataframe_length - self.dataframe_length//2)
+        self.list_crowdedness = ['busy'] * (self.dataframe_length//2) + ['quiet'] * (self.dataframe_length - self.dataframe_length//2)
+        self.list_lengthofstay = ['short'] * (self.dataframe_length//2) + ['long'] * (self.dataframe_length - self.dataframe_length//2)
+        
+        # We randomize the lists of new values
+        random.shuffle(self.list_foodquality)
+        random.shuffle(self.list_crowdedness)
+        random.shuffle(self.list_lengthofstay)
+
+        # We create a new dataframe consisting of three columns, each with a name and a corresponding 
+        # Eandomized list
+        self.extra_categories_data = {'foodquality': self.list_foodquality,
+                                      'crowdedness': self.list_crowdedness,
+                                      'lengthofstay': self.list_lengthofstay}
+        self.extra_categories_df = pd.DataFrame(self.extra_categories_data)
+
+        # Consequent features
+        # 4. touristic
+        # 5. assigned seats
+        # 6. children
+        # 7. romantic
+
+        # The initial values for the 'consequent' columns should be "0" or "1" for children.
+        # The values for this column can become "1" or "0" from inference if the user has additional preferences.
+        self.extra_categories_df['touristic'] = 0
+        self.extra_categories_df['assignedseats'] = 0
+        self.extra_categories_df['children'] = 1
+        self.extra_categories_df['romantic'] = 0
+
+        # Now we join the two dataframes together
+        self.complete_df = self.df.join(self.extra_categories_df)
+
+        # Copy the complete dataframe to the original dataframe,
+        # so that the original dataframe contains the new features
+        self.df = self.complete_df.copy()
+    
     def get_keywords(self):
         """
         Extracts unique keywords for food, price, 
