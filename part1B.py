@@ -49,10 +49,10 @@ class RestaurantRecommendationSystem:
     ASK_FOOD_STATE = 3
     ASK_PRICE_STATE = 4
     ASK_AREA_STATE = 5
-    RECOMMEND_STATE = 6
+    SEARCH_STATE = 6
     NO_MORE_RECOMMENDATIONS_STATE = 7
     GIVE_DETAILS_STATE = 8
-    RECOMMEND_MORE_STATE = 9
+    SEARCH_MORE_STATE = 9
     END_STATE = 10
 
     DONT_CARE_KEYWORDS = [
@@ -403,7 +403,7 @@ class RestaurantRecommendationSystem:
         if self.area_preference is None:
             return self.ASK_AREA_STATE
 
-        return self.RECOMMEND_STATE
+        return self.SEARCH_STATE
 
     def ask_food_handler(self):
         """
@@ -491,7 +491,7 @@ class RestaurantRecommendationSystem:
         
         # Default case, continue recommending more restaurants
         else:
-            return self.RECOMMEND_MORE_STATE
+            return self.SEARCH_MORE_STATE
         
     def recommend_handler(self):
         """
@@ -613,7 +613,7 @@ class RestaurantRecommendationSystem:
         
         # Default case, continue recommending more restaurants
         else:
-            return self.RECOMMEND_MORE_STATE
+            return self.SEARCH_MORE_STATE
         
     # ------------------------ State Transition ------------------------
 
@@ -645,10 +645,10 @@ class RestaurantRecommendationSystem:
 
         elif self.state == self.ASK_AREA_STATE:
             self.ask_area_handler()
-            self.state = self.RECOMMEND_STATE
+            self.state = self.SEARCH_STATE
             return
 
-        elif self.state == self.RECOMMEND_STATE:
+        elif self.state == self.SEARCH_STATE:
             self.state = self.recommend_handler()
             return 
         
@@ -656,7 +656,7 @@ class RestaurantRecommendationSystem:
             self.state = self.no_more_recommendations_handler()
             return
 
-        elif self.state == self.RECOMMEND_MORE_STATE:
+        elif self.state == self.SEARCH_MORE_STATE:
             self.state = self.recommend_more_handler()
             return
 
