@@ -235,7 +235,7 @@ class RestaurantRecommendationSystem:
                 continue 
             for keyword in keywords:
                 # Check if any word from the utterance matches part of a multi-word keyword
-                # e.g. if the user want "asian" return "asian oriental" which is an are keyword
+                # e.g. if the user wants "asian" return "asian oriental" which is an area keyword
                 if word in keyword.split():
                     return keyword
                 distance = Levenshtein.distance(word.lower(), keyword.lower())
@@ -273,8 +273,22 @@ class RestaurantRecommendationSystem:
         return self.extract_specific_preferences(utterance, keywords)
 
     # ADDED
-    def extract_additional_preference(self, additional_preferences_keywords):
-        # TO DO
+    def extract_additional_preference(self, utterance, additional_preferences_keywords):
+        for keyword in additional_preferences_keywords:
+            if keyword in utterance:
+                return keyword
+        
+        utterance_words = utterance.lower().split()
+        
+        for word in utterance_words:
+            for keyword in additional_preferences_keywords:
+                # Check if any word from the utterance matches part of a multi-word keyword
+                # e.g. if the user wants "seats" return "assigned seats" which is an area keyword
+                if word in keyword.split():
+                    return keyword
+                distance = Levenshtein.distance(word.lower(), keyword.lower())
+                if distance <= self.levenshtein_threshold:  # Adjust threshold as needed
+                    return keyword
         return None
     
     # ADDED
@@ -564,6 +578,7 @@ class RestaurantRecommendationSystem:
     def additional_preferences_handler(self):
         # Extract preferences from user input
         self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
+        print("Extracted additional preference: ", self.additional_preference)
         
         # If no additional preference was extracted from user input
         if self.additional_preference is None:
@@ -575,6 +590,7 @@ class RestaurantRecommendationSystem:
                 print("Dialog act: ", dialog_act)
 
                 self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
+                print("Extracted additional preference: ", self.additional_preference)
 
                 if self.additional_preference is None:
                     print("Please give a valid additional preference.")
