@@ -273,6 +273,7 @@ class RestaurantRecommendationSystem:
         return None
     
     # ADDED
+    # extracting the consequent from the dataframe
     def run_inference(self):
         # TO DO
         # use self.possible_restaurants
