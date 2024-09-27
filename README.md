@@ -25,6 +25,13 @@ The system asks the user which model to use for dialog act classification (Linea
 Then the conversation starts.
 
 # Part1C.py
+We implemented the following configurabilities building upon part1B.py:
+1. Use one of the baselines for dialog act recognition instead of the machine learning classifier.
+2. Levenshtein edit distance for preference extraction.
+3. Introduce a delay before showing system responses.
+4. Allow users to change their preferences or not.
+5. Allow preferences to be stated in a single utterance only.
+
 The system asks the user which model to use for dialog act classification (Linear Regression Model / Decision Tree Model / Rule Based Model).
 
 Then the system asks for the Levenshtein distance threshold (valid range [0,3]).
