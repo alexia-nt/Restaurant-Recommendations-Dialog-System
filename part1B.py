@@ -15,7 +15,8 @@ class RestaurantRecommendationSystem:
     Implementation of a recommender system
     that provides information about restaurants
     based on the user's preferences by 
-    utilizing Rule-Based and ML (DT and LG)
+    utilizing Rule-Based and Machine Learning
+    (Decision Tree and Logistic Regression)
     classification.
 
     Attributes
@@ -35,7 +36,6 @@ class RestaurantRecommendationSystem:
     *_STATE: constants representing states in conversation flow (see state diagram)
     DONT_CARE_KEYWORDS: keywords representing user's absence of preference
     RULE_BASED_MODEL_RULES: rules representing Rule-Based model from assign. 1A
-    
     """
 
     DATA_FILE = "data/restaurant_info.csv"
@@ -90,12 +90,11 @@ class RestaurantRecommendationSystem:
         Parameters
         ----------
         - model_preference (int): reflects model choice of user:
-        1 for Logistic Regression model
-        2 for Decision Tree model
-        3 for Rule-Based model
-
+            1 for Logistic Regression model
+            2 for Decision Tree model
+            3 for Rule-Based model
         """
-
+        
         # Read restaurant data
         self.df = pd.read_csv(self.DATA_FILE)
 
@@ -128,11 +127,10 @@ class RestaurantRecommendationSystem:
         and area from the restaurant dataset.
 
         Returns
-        --------
+        -------
         - food_keywords (list): List of unique food keywords
         - price_keywords (list): List of unique price keywords
         - area_keywords (list): List of unique area keywords
-        
         """
 
         food_keywords = list(self.df["food"].dropna().astype(str).unique())
@@ -144,11 +142,13 @@ class RestaurantRecommendationSystem:
         """
         Creates a Pandas DataFrame from the given data file.
 
-        Args:
-            data_file: The path of the data file.
+        Parameters
+        ----------
+        - data_file: The path of the data file.
 
-        Returns:
-            df: A DataFrame with two columns: 'label' and 'utterance'.
+        Returns
+        -------
+        - df: A DataFrame with two columns: 'label' and 'utterance'.
         """
 
         labels = []
@@ -166,6 +166,15 @@ class RestaurantRecommendationSystem:
         return df
 
     def train_LR(self):
+        """
+        Trains a Logistic Regression model on dialog act classification data.
+
+        Returns
+        -------
+        - LR_model: The trained Logistic Regression model.
+        - vectorizer: The CountVectorizer used to transform text data into numerical features.
+        """
+
         df_dialog_acts = self.create_dataframe(self.DIALOG_ACTS_FILE)
 
         X = df_dialog_acts['utterance']
@@ -182,6 +191,15 @@ class RestaurantRecommendationSystem:
         return LR_model, vectorizer
     
     def train_DT(self):
+        """
+        Trains a Decision Tree model on dialog act classification data.
+
+        Returns
+        -------
+        - DT_model: The trained Decision Tree model.
+        - vectorizer: The CountVectorizer used to transform text data into numerical features.
+        """
+
         df_dialog_acts = self.create_dataframe(self.DIALOG_ACTS_FILE)
 
         X = df_dialog_acts['utterance']
@@ -208,13 +226,11 @@ class RestaurantRecommendationSystem:
         Parameters
         -----------
         - utterance (str): string of user input 
-        - keywords (list): list of extracted keywords 
-        from restaurant database for the preference category 
+        - keywords (list): list of keywords that are relevant to the requested preference category (e.g., food types, price ranges) 
         
         Returns
         --------
         - (None, str): matched keyword or None if no match was found
-       
         """
 
         for keyword in keywords:
@@ -242,19 +258,18 @@ class RestaurantRecommendationSystem:
         
     def extract_initial_preferences(self, utterance, keywords, preference_type):
         """
-        Extracts initial user preferences at the start of the session.
+        Extracts initial user preferences at the start of the session,
+        allowing preferences to be stated in a single utterance only.
         
         Parameters
         -----------
         - utterance (str): user's input
-        - keywords (list): keywords (list): list of extracted keywords 
-        from restaurant database for the preference category
+        - keywords (list): list of keywords that are relevant to the requested preference category (e.g., food types, price ranges)
         - preference_type (str): The type of preference being requested (e.g., "food", "price", "area").
         
         Returns
         --------
-        - (None, str): matched keyword or None if no match was found        
-        
+        - (None, str): matched keyword or None if no match was found
         """
         
         if f"any {preference_type}" in utterance:
@@ -263,6 +278,21 @@ class RestaurantRecommendationSystem:
         return self.extract_specific_preferences(utterance, keywords)
 
     def extract_preferences(self, utterance, keywords):
+        """
+        Extracts user preferences from an utterance, checking if the user
+        has any "don't care" preferences or if a specific keyword matches
+        their preferences.
+
+        Parameters
+        -----------
+        - utterance (str): string of user input 
+        - keywords (list): list of keywords that are relevant to the requested preference category (e.g., food types, price ranges)
+        
+        Returns
+        --------
+        - (None, str): matched keyword or None if no match was found
+        """
+
         for keyword in self.DONT_CARE_KEYWORDS:
             if keyword in utterance:
                 return "any"
@@ -271,15 +301,13 @@ class RestaurantRecommendationSystem:
 
     def get_matching_restaurants(self):
         """
-        Filters the restaurant dataset based on user
-        preferences and returns list with restaurants
-        that match those preferences.
+        Filters the restaurant dataset based on user preferences and
+        returns list with restaurants that match those preferences.
         In case no matches are found, an empty list is returned. 
 
         Returns
         -------- 
-        - (list) list of string names of matched restaurants
-        
+        - (list) list of dictionaries of matched restaurants
         """
 
         filtered_df = self.df.copy()
@@ -302,7 +330,6 @@ class RestaurantRecommendationSystem:
     def print_details(self):
         """
         Prints the available details for the recommended restaurant.
-        
         """
         print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant:")
         if(pd.isna(self.possible_restaurants[0]['phone'])):
@@ -324,14 +351,13 @@ class RestaurantRecommendationSystem:
         """
         Determines the dialog act label using the Rule-Based model
         and returns dialog act label when a match is found between the 
-        user input and the model. When no match is found, the majority label
-        'inform' is returned. 
+        user input and the model. When no match is found, the majority
+        label 'inform' is returned. 
         
         Returns
         --------
         - (label (str) or 'inform'): label of the matched dialog act, 
-        "inform" if no match is found.
-        
+        'inform' if no match is found.
         """
 
         for label, keywords in self.RULE_BASED_MODEL_RULES.items():
@@ -350,7 +376,6 @@ class RestaurantRecommendationSystem:
         --------
         - (str) predicted label of the user input by 
         the chosen model by the user
-        
         """
 
         if(self.model_preference == LR_MODEL_PREFERENCE):
@@ -367,12 +392,9 @@ class RestaurantRecommendationSystem:
         Handles the first stage of the conversation with the user.
         Ask the user for input, leads the user to the prediction 
         of the dialog act in the user input. 
-        
         """
-
         print("Hello, welcome to the restaurant recommendations dialogue system! You can ask for restaurants by area, price range, or food type.")
         self.user_input = input(">>").lower()
-        return
 
     def ask_initial_preferences_handler(self):
         """
@@ -381,7 +403,7 @@ class RestaurantRecommendationSystem:
         Checks if preferences are given by user and if not, asks preferences
         of user.
 
-        Return
+        Returns
         -------
         - (int): next state based on extracted/missing preferences (ASK_FOOD, ASK_AREA, ASK_PRICE)
 
@@ -406,7 +428,6 @@ class RestaurantRecommendationSystem:
         """
         Handles asking the user for their food preference
         by prompting repeatedly until a preference is given.
-        
         """
 
         if self.food_preference is not None:
@@ -426,7 +447,6 @@ class RestaurantRecommendationSystem:
         """
         Handles asking the user for their price preference
         by prompting repeatedly until a preference is given.
-        
         """
 
         if self.price_preference is not None:
@@ -446,7 +466,6 @@ class RestaurantRecommendationSystem:
         """
         Handles asking the user for their area preference
         by prompting repeatedly until a preference is given.
-        
         """
 
         if self.area_preference is not None:
@@ -472,7 +491,6 @@ class RestaurantRecommendationSystem:
         Returns
         --------
         - (int): next state (END, GIVE_DETAILS, RECOMMEND_MORE)
-        
         """
 
         dialog_act = self.dialog_act_prediction()
@@ -498,9 +516,7 @@ class RestaurantRecommendationSystem:
 
         Returns
         --------
-        - (int): The next state (NO_MORE_RECOMMENDATIONS, END, GIVE_DETAILS, 
-        RECOMMEND_MORE)
-        
+        - (int): The next state (NO_MORE_RECOMMENDATIONS, END, GIVE_DETAILS, RECOMMEND_MORE)
         """
 
         print(f"Ok, I am searching for a restaurant based on the following preferences: {self.food_preference} restaurant at {self.price_preference} price in {self.area_preference} area...")
@@ -535,7 +551,6 @@ class RestaurantRecommendationSystem:
         Returns
         --------
         - (int): The next state (END or ASK_INITIAL_PREFERENCES_STATE)
-        
         """
 
         # Predict dialog act
@@ -565,7 +580,6 @@ class RestaurantRecommendationSystem:
         --------
         - (int): The next state (END, GIVE_DETAILS, RECOMMEND_MORE, 
         NO_MORE_RECOMMENDATIONS)
-
         """
 
         # If there are more restaurants to recommend
@@ -596,8 +610,8 @@ class RestaurantRecommendationSystem:
         Returns
         --------
         - (int): The next state (END or RECOMMEND_MORE)
-
         """
+
         self.print_details()
 
         self.user_input = input(">>").lower()
@@ -618,8 +632,8 @@ class RestaurantRecommendationSystem:
         """
         Handles the transitions between different conversational states.
         Calls handler functions based on current state and updates states after.
-        
         """
+
         if state == self.END_STATE:
             print("I hope I was helpful, goodbye!")
             return
@@ -664,15 +678,22 @@ def print_models_menu():
     """
     Prints menu with the three classification models (RB, RL, DT)  
     so the user can choose a model for dialog act classification.
-
     """
- 
     print("\nOptions:")
     print("1. Linear Regression Model")
     print("2. Decision Tree Model")
     print("3. Rule Based Model")
 
 def get_model_preference():
+    """
+    Prompts the user to select a dialog act classification model
+    from the available options (Linear Regression, Decision Tree, Rule-Based).
+    
+    Returns
+    --------
+    - model_preference (str): The selected model preference constant (LR_MODEL_PREFERENCE, 
+                              DT_MODEL_PREFERENCE, or RULE_BASED_MODEL_PREFERENCE).
+    """
     # Display the models menu
     print_models_menu()
 
