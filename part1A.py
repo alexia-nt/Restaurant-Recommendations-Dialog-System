@@ -268,7 +268,7 @@ def print_menu():
     print("2. Give an utterance for prediction")
     print("3. Exit")
 
-def generate_barplot(df):
+def generate_barplots(df):
     # df_counted = df.groupby(['label'])['label'].count().reset_index(name='count')
     # df.plot.pie(y='label', figsize=(10, 10))
     # df.label.value_counts().plot(kind='bar', xlabel='Label', ylabel='Count', title='Distribution of dialog act labels in original dataset')
@@ -278,12 +278,23 @@ def generate_barplot(df):
     count.value_counts().plot(logy=True, kind='bar', color='green', title='Distribution of # words per utterance of original dataset')
     plt.xlabel('# words in utterance', labelpad=12)
     plt.ylabel('Count')
-    plt.show()
+
+    plt.tight_layout()
+
+    # Create the 'figures' directory if it doesn't exist
+    figures_dir = "figures"
+    os.makedirs(figures_dir, exist_ok=True)
+    
+    # Save the plot in the 'figures' directory
+    plot_filename = os.path.join(figures_dir, "Number of words per utterance.png")
+    plt.savefig(plot_filename)
 
 
 if __name__ == "__main__":
     # Load the data into a DataFrame
     df = create_dataframe(DATA_FILE)
+
+    # generate_barplots(df)
 
     # Create dataframe without duplicates
     df_no_dup = create_dataframe_no_dup(df)
