@@ -374,8 +374,7 @@ class RestaurantRecommendationSystem:
 
         Returns
         --------
-        - (str) predicted label of the user input by 
-        the chosen model by the user
+        - (str) predicted label of the user input by the chosen model by the user
         """
 
         if(self.model_preference == LR_MODEL_PREFERENCE):
@@ -398,15 +397,14 @@ class RestaurantRecommendationSystem:
 
     def ask_initial_preferences_handler(self):
         """
-        Handles the extraction process of the initial preferences of the user at the 
-        start of the session. 
-        Checks if preferences are given by user and if not, asks preferences
-        of user.
+        Handles the extraction process of the initial preferences
+        of the user at the start of the session. 
+        Checks if preferences are given by user and if not, returns
+        corresponding states to ask for specific preferences.
 
         Returns
         -------
         - (int): next state based on extracted/missing preferences (ASK_FOOD, ASK_AREA, ASK_PRICE)
-
         """
 
         self.food_preference = self.extract_initial_preferences(self.user_input, self.food_keywords, "food")
@@ -483,10 +481,8 @@ class RestaurantRecommendationSystem:
 
     def found_restaurant_for_recommendation(self):
         """
-        Determines the next state after a restaurant
-        recommendation is made: end conversation, give
-        details about restaurant or recommend more 
-        restaurants.
+        Determines the next state after a restaurant recommendation is made:
+        end conversation, givedetails about restaurant or recommend more restaurants.
 
         Returns
         --------
@@ -545,8 +541,7 @@ class RestaurantRecommendationSystem:
     def no_more_recommendations_handler(self):
         """
         Handles scenario where no more restaurants match the user's preferences. 
-        Asks the user if they want to adjust their preferences or end 
-        the conversation.
+        Asks the user if they want to adjust their preferences or end the conversation.
 
         Returns
         --------
@@ -574,7 +569,7 @@ class RestaurantRecommendationSystem:
         Handles process of recommending additional restaurants if multiple matching 
         restaurants were found. 
         Removes the previously recommended restaurant from the list and recommends
-        a new one. 
+        a new one if there is one.
 
         Returns
         --------
