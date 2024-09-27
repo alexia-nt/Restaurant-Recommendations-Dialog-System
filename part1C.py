@@ -125,9 +125,6 @@ class RestaurantRecommendationSystem:
         # area_keywords list and not only the "centre" area keyword
         self.area_keywords.append("center")
 
-        # Initialize state
-        self.state = self.WELCOME_STATE
-
         # Initialize variables
         self.user_input = ""
         self.food_preference = None
@@ -847,71 +844,121 @@ class RestaurantRecommendationSystem:
         
     # ------------------------ State Transition ------------------------
 
-    def handle_transition(self):
+    # def handle_transition(self):
+    #     """
+    #     Handles the transitions between different conversational states.
+    #     Calls handler functions based on current state and updates states after.
+        
+    #     """
+
+    #     if self.state == self.WELCOME_STATE:
+    #         self.welcome_state_handler()
+    #         self.state = self.ASK_INITIAL_PREFERENCES_STATE
+    #         return
+
+    #     elif self.state == self.ASK_INITIAL_PREFERENCES_STATE:
+    #         self.state = self.ask_initial_preferences_handler()
+    #         return
+
+    #     elif self.state == self.ASK_FOOD_STATE:
+    #         self.ask_food_handler()
+    #         self.state = self.ASK_PRICE_STATE
+    #         return
+
+    #     elif self.state == self.ASK_PRICE_STATE:
+    #         self.ask_price_handler()
+    #         self.state = self.ASK_AREA_STATE
+    #         return
+
+    #     elif self.state == self.ASK_AREA_STATE:
+    #         self.ask_area_handler()
+    #         self.state = self.SEARCH_STATE
+    #         return
+
+    #     elif self.state == self.SEARCH_STATE:
+    #         self.state = self.search_handler()
+    #         return
+        
+    #     # ADDED
+    #     elif self.state == self.ADDITIONAL_PREFERENCES_STATE:
+    #         self.state = self.additional_preferences_handler()
+    #         return
+        
+    #     elif self.state == self.NO_MORE_RECOMMENDATIONS_STATE:
+    #         self.state = self.no_more_recommendations_handler()
+    #         return
+
+    #     elif self.state == self.SEARCH_MORE_STATE:
+    #         self.state = self.search_more_handler()
+    #         return
+
+    #     elif self.state == self.GIVE_DETAILS_STATE:
+    #         self.state = self.give_details_handler()
+    #         return
+
+    # def run(self):
+    #     """
+    #     Handles main loop of the restaurant recommendation chatbot
+    #     by checking whether the end state of the conversation is reached.
+    #     Prints goodbye message when end state is reached. 
+        
+    #     """
+
+    #     while self.state != self.END_STATE:
+    #         self.handle_transition()
+        
+    #     time.sleep(self.delay_preference)
+    #     print("I hope I was helpful, goodbye!")
+    
+    def handle_transition(self, state):
         """
         Handles the transitions between different conversational states.
         Calls handler functions based on current state and updates states after.
         
         """
-
-        if self.state == self.WELCOME_STATE:
+        if state == self.END_STATE:
+            print("I hope I was helpful, goodbye!")
+            return
+        
+        elif state == self.WELCOME_STATE:
             self.welcome_state_handler()
-            self.state = self.ASK_INITIAL_PREFERENCES_STATE
-            return
+            return self.handle_transition(self.ASK_INITIAL_PREFERENCES_STATE)
 
-        elif self.state == self.ASK_INITIAL_PREFERENCES_STATE:
-            self.state = self.ask_initial_preferences_handler()
-            return
+        elif state == self.ASK_INITIAL_PREFERENCES_STATE:
+            state = self.ask_initial_preferences_handler()
+            return self.handle_transition(state)
 
-        elif self.state == self.ASK_FOOD_STATE:
+        elif state == self.ASK_FOOD_STATE:
             self.ask_food_handler()
-            self.state = self.ASK_PRICE_STATE
-            return
+            return self.handle_transition(self.ASK_PRICE_STATE)
 
-        elif self.state == self.ASK_PRICE_STATE:
+        elif state == self.ASK_PRICE_STATE:
             self.ask_price_handler()
-            self.state = self.ASK_AREA_STATE
-            return
+            return self.handle_transition(self.ASK_AREA_STATE)
 
-        elif self.state == self.ASK_AREA_STATE:
+        elif state == self.ASK_AREA_STATE:
             self.ask_area_handler()
-            self.state = self.SEARCH_STATE
-            return
+            return self.handle_transition(self.SEARCH_STATE)
 
-        elif self.state == self.SEARCH_STATE:
-            self.state = self.search_handler()
-            return
+        elif state == self.SEARCH_STATE:
+            state = self.search_handler()
+            return self.handle_transition(state)
         
-        # ADDED
-        elif self.state == self.ADDITIONAL_PREFERENCES_STATE:
-            self.state = self.additional_preferences_handler()
-            return
+        elif state == self.ADDITIONAL_PREFERENCES_STATE:
+            state = self.additional_preferences_handler()
+            return self.handle_transition(state)
         
-        elif self.state == self.NO_MORE_RECOMMENDATIONS_STATE:
-            self.state = self.no_more_recommendations_handler()
-            return
+        elif state == self.NO_MORE_RECOMMENDATIONS_STATE:
+            state = self.no_more_recommendations_handler()
+            return self.handle_transition(state)
 
-        elif self.state == self.SEARCH_MORE_STATE:
-            self.state = self.search_more_handler()
-            return
+        elif state == self.SEARCH_MORE_STATE:
+            state = self.search_more_handler()
+            return self.handle_transition(state)
 
-        elif self.state == self.GIVE_DETAILS_STATE:
-            self.state = self.give_details_handler()
-            return
-
-    def run(self):
-        """
-        Handles main loop of the restaurant recommendation chatbot
-        by checking whether the end state of the conversation is reached.
-        Prints goodbye message when end state is reached. 
-        
-        """
-
-        while self.state != self.END_STATE:
-            self.handle_transition()
-        
-        time.sleep(self.delay_preference)
-        print("I hope I was helpful, goodbye!")
+        elif state == self.GIVE_DETAILS_STATE:
+            state = self.give_details_handler()
+            return self.handle_transition(state)
 
 def print_models_menu():
     """
@@ -999,4 +1046,4 @@ if __name__ == "__main__":
     
     print("\nStarting conversation...\n")
     system = RestaurantRecommendationSystem(model_preference, levenshtein_preference, delay_preference)
-    system.run()
+    system.handle_transition(1) # 1 == WELCOME_STATE
