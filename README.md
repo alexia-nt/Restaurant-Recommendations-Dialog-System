@@ -11,20 +11,20 @@ The following packages are required:
 - **matplotlib**: For plotting graphs and visualizations.
 - **Levenshtein**: For calculating Levenshtein distance.
 
-# Part1A.py
+## Part1A.py
 
 The system provides the following options in the terminal:
 1. Print evaluation metrics
 2. Give an utterance for prediction
 3. Exit
 
-# Part1B.py
+## Part1B.py
 
 The system asks the user which model to use for dialog act classification (Linear Regression Model / Decision Tree Model / Rule Based Model).
 
 Then the conversation starts.
 
-# Part1C.py
+## Part1C.py
 We implemented the following configurabilities building upon part1B.py:
 1. Use one of the baselines for dialog act recognition instead of the machine learning classifier.
 2. Levenshtein edit distance for preference extraction.
@@ -37,5 +37,7 @@ The system asks the user which model to use for dialog act classification (Linea
 Then the system asks for the Levenshtein distance threshold (valid range [0,3]).
 
 Then the system asks if the user want a small delay in the system responses so that the conversation feels more natural.
+
+After having extracted the user preferences, the conversation starts.
 
 
