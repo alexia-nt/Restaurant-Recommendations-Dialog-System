@@ -660,7 +660,7 @@ class RestaurantRecommendationSystem:
             state = self.give_details_handler()
             return self.handle_transition(state)
 
-def print_menu():
+def print_models_menu():
     """
     Prints menu with the three classification models (RB, RL, DT)  
     so the user can choose a model for dialog act classification.
@@ -672,13 +672,12 @@ def print_menu():
     print("2. Decision Tree Model")
     print("3. Rule Based Model")
 
-# Create an instance and run the system
-if __name__ == "__main__":
-    # Display the menu
-    print_menu()
+def get_model_preference():
+    # Display the models menu
+    print_models_menu()
 
     # Get input from the user
-    choice = input("\nEnter your choice (1/2/3).\n>>").strip()
+    choice = input("\nEnter your model choice (1/2/3).\n>>").strip()
 
     while True:
         
@@ -694,10 +693,17 @@ if __name__ == "__main__":
         
         else:
             # Display the menu
-            print_menu()
+            print_models_menu()
 
             # Get input from the user
             choice = input("\nInvalid choice. Please select a valid option (1/2/3).\n>>")
+    
+    return model_preference
+
+# Create an instance and run the system
+if __name__ == "__main__":
+    # Get model preference from user
+    model_preference = get_model_preference()
 
     print("\nStarting conversation...\n")
     system = RestaurantRecommendationSystem(model_preference)
