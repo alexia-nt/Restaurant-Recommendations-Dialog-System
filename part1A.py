@@ -10,6 +10,24 @@ import matplotlib.pyplot as plt
 
 DATA_FILE = 'data/dialog_acts.dat'
 
+RULES = {
+    'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search', 'detail'],
+    'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search', 'detail'],
+    'thankyou': ['thank', 'thanks', 'appreciate', 'grateful', 'thank you', 'many thanks', 'thankful'],
+    'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
+    'null': ['cough', 'noise', 'laugh', 'uh', 'um', 'background', 'incoherent'],
+    'affirm': ['yes', 'yeah', 'right', 'correct', 'sure', 'absolutely', 'definitely', 'of course', 'affirm', 'indeed'],
+    'negate': ['no', 'not', 'don\'t', 'nope', 'none', 'wrong', 'never', 'incorrect'],
+    'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later', 'take care', 'talk to you soon'],
+    'confirm': ['confirm', 'is it', 'check if', 'right?', 'verify', 'am i correct', 'confirming', 'confirmation', 'can you confirm'],
+    'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
+    'repeat': ['repeat', 'again', 'say again', 'can you repeat', 'could you repeat', 'pardon'],
+    'ack': ['okay', 'um', 'uh-huh', 'got it', 'alright', 'fine', 'ok', 'acknowledge'],
+    'deny': ['dont want', 'don\'t want', 'reject', 'not that', 'no thanks', 'not interested', 'decline', 'denying'],
+    'restart': ['restart', 'start over', 'begin again', 'reset', 'new', 'begin anew'],
+    'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further']
+}
+
 def create_dataframe(data_file):
     """
     Creates a Pandas DataFrame from the given data file.
@@ -20,7 +38,6 @@ def create_dataframe(data_file):
     Returns:
         df: A DataFrame with two columns: 'label' and 'utterance'.
     """
-
     labels = []
     utterances = []
 
@@ -45,7 +62,6 @@ def create_dataframe_no_dup(df):
     Returns:
         df_no_dup: A new DataFrame with duplicate utterances removed.
     """
-    
     # remove \n to avoid newlines in no dup file
     df['utterance'] =  df['utterance'].str.replace('\n', '')
 
@@ -57,6 +73,31 @@ def create_dataframe_no_dup(df):
 
     return df_no_dup
 
+def generate_barplots(df):
+    """
+    Generates a bar plot visualizing the distribution of utterance lengths (number of words) in the given DataFrame.
+
+    Args:
+        df: A Pandas DataFrame with 'label' and 'utterance' columns.
+    """
+    count = df['utterance'].str.split().str.len()
+    count.index = count.index.astype(str) + ' words:'
+    count.value_counts().plot(logy=True, kind='bar', color='green', title='Distribution of # words per utterance of original dataset')
+    
+    plt.xlabel('# words in utterance', labelpad=12)
+    plt.ylabel('Count')
+
+    # Adjust layout to prevent labels from being cut off
+    plt.tight_layout()
+
+    # Create the 'figures' directory if it doesn't exist
+    figures_dir = "figures"
+    os.makedirs(figures_dir, exist_ok=True)
+    
+    # Save the plot in the 'figures' directory
+    plot_filename = os.path.join(figures_dir, "Number of words per utterance.png")
+    plt.savefig(plot_filename)
+
 def return_majority_label(df):
     """
     Returns the most frequent label in the DataFrame.
@@ -67,7 +108,6 @@ def return_majority_label(df):
     Returns:
         majority_label: The most frequent label in the DataFrame.
     """
-
     # Count occurrences of each label
     label_counts = df['label'].value_counts()
 
@@ -89,7 +129,6 @@ def majority_label_model_predict(df, X_test):
     Returns:
         y_pred: A list of predicted labels (the majority label).
     """
-
     y_pred = []
     majority_label = return_majority_label(df)
     for _ in X_test: # for every utterance in X_test
@@ -106,31 +145,7 @@ def rule_based_model_get_label(utterance):
     Returns:
         predicted_label: The predicted label.
     """
-
-    rules = {
-        'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
-        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
-
-        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search', 'detail'],
-        'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further'],
-        'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
-
-        'negate': ['no', 'not', 'don\'t', 'nope', 'none', 'wrong', 'never', 'incorrect'],
-        'deny': ['dont want', 'don\'t want', 'reject', 'not that', 'no thanks', 'not interested', 'decline', 'denying'],
-        'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later', 'take care', 'talk to you soon'],
-
-        'ack': ['okay', 'um', 'uh-huh', 'got it', 'alright', 'fine', 'ok', 'acknowledge'],
-        'confirm': ['confirm', 'is it', 'check if', 'right?', 'verify', 'am i correct', 'confirming', 'confirmation', 'can you confirm'],
-        'affirm': ['yes', 'yeah', 'right', 'correct', 'sure', 'absolutely', 'definitely', 'of course', 'affirm', 'indeed'],
-        'thankyou': ['thank', 'thanks', 'appreciate', 'grateful', 'thank you', 'many thanks', 'thankful'],
-
-        'repeat': ['repeat', 'again', 'say again', 'can you repeat', 'could you repeat', 'pardon'],
-        'restart': ['restart', 'start over', 'begin again', 'reset', 'new', 'begin anew'],
-
-        'null': ['cough', 'noise', 'laugh', 'uh', 'um', 'background', 'incoherent']
-    }
-
-    for label, keywords in rules.items():
+    for label, keywords in RULES.items():
         if any(keyword in utterance for keyword in keywords):
             return label
 
@@ -147,7 +162,6 @@ def rule_based_model_predict(X_test):
     Returns:
         y_pred: A list of predicted labels corresponding to the test utterances.
     """
-
     y_pred = []
     for utterance in X_test:
         y_pred.append(rule_based_model_get_label(utterance))
@@ -166,10 +180,8 @@ def train_DT_LR(X_train, y_train):
         LR_model: The trained Logistic Regression model.
         vectorizer: The fitted CountVectorizer object.
     """
-
     vectorizer = CountVectorizer()
     X_bow_train = vectorizer.fit_transform(X_train)
-    # X_bow_test = vectorizer.transform(X_test)
     
     # Train Decision-Tree model
     DT_model = DecisionTreeClassifier()
@@ -195,7 +207,6 @@ def predict_DT_LR(DT_model, LR_model, vectorizer, X_test):
         Y_pred_DT: A list or array containing the predicted labels for the test data using the Decision Tree model.
         Y_pred_LR: A list or array containing the predicted labels for the test data using the Logistic Regression model.
     """
-
     X_bow_test = vectorizer.transform(X_test)
     Y_pred_DT = DT_model.predict(X_bow_test)
     Y_pred_LR = LR_model.predict(X_bow_test)
@@ -212,7 +223,6 @@ def save_confusion_matrix(y_test, y_pred, model_name):
         y_pred: A list of the predicted labels for the test set.
         model_name: A string with the name of the model for evaluation.
     """
-
     # labels = ["ack", "affirm", "bye", "confirm", "deny", "hello", "inform", "negate", "null", "repeat", "reqalts", "require", "request", "restart", "thankyou"]
     
     # Get the unique labels from the test set and sort to keep labels in the correct order
@@ -250,7 +260,6 @@ def print_metrics(y_test, y_pred, model_name):
         y_pred: A list of the predicted labels for the test set.
         model_name: A string with the name of the model for evaluation.
     """
-
     print("\nClassification Report:")
     print(classification_report(y_test, y_pred, zero_division=0))
 
@@ -267,27 +276,39 @@ def print_metrics(y_test, y_pred, model_name):
     print("Recall:", recall)
     print("F1-score:", f1)
 
-def print_metrics_for_each_model(df, X_dup_test, y_dup_test, y_no_dup_test, y_dup_pred_DT, y_dup_pred_LR, y_no_dup_pred_DT, y_no_dup_pred_LR):
+def print_metrics_for_baseline_models(df, X_test, y_test):
     """
-    Prints evaluation metrics for alld the models (majority-label model,
-    rule-based model, decision tree and logistic regression).
+    Prints evaluation metrics for the baseline models (majority-label model and rule-based model).
 
     Args:
         df: The DataFrame containing the training data.
         X_test: A list of test utterances.
         y_test: A list of the actual labels for the test utterances.
     """
-    
     # Make predictions and print metrics for the majority label model
     print("\nMajority-Label Model - Evaluation Metrics:")
-    y_pred_ml = majority_label_model_predict(df, X_dup_test)
-    print_metrics(y_dup_test, y_pred_ml, "Majority-Label Model")
+    y_pred = majority_label_model_predict(df, X_test)
+    print_metrics(y_test, y_pred, "Majority-Label Model")
 
     # Make predictions and print metrics for the rule based model
     print("\nRule-Based Model - Evaluation Metrics:")
-    y_pred_rb = rule_based_model_predict(X_dup_test)
-    print_metrics(y_dup_test, y_pred_rb, "Rule-Based Model")
+    y_pred = rule_based_model_predict(X_test)
+    print_metrics(y_test, y_pred, "Rule-Based Model")
 
+def print_metrics_for_DT_LR(y_dup_test, y_dup_pred_DT, y_dup_pred_LR, y_no_dup_test, y_no_dup_pred_DT, y_no_dup_pred_LR):
+    """
+    Prints evaluation metrics for the ML models (Decision Tree and Logistic Regression)
+    on both the original and duplicate-free data.
+
+    Args:
+        y_dup_test: The true labels for the test set with duplicate utterances.
+        y_dup_pred_DT: The predicted labels for the test set with duplicate utterances using the Decision Tree model.
+        y_dup_pred_LR: The predicted labels for the test set with duplicate utterances using the Logistic Regression model.
+
+        y_no_dup_test: The true labels for the test set without duplicate utterances.
+        y_no_dup_pred_DT: The predicted labels for the test set without duplicate utterances using the Decision Tree model.
+        y_no_dup_pred_LR: The predicted labels for the test set without duplicate utterances using the Logistic Regression model.
+    """
     print("\nDecision-Tree model - Evaluation Metrics:")
     print("\nOriginal data:")
     print_metrics(y_dup_test, y_dup_pred_DT, "DT-model original data")
@@ -300,42 +321,12 @@ def print_metrics_for_each_model(df, X_dup_test, y_dup_test, y_no_dup_test, y_du
     print("\nData without duplications:")
     print_metrics(y_no_dup_test, y_no_dup_pred_LR, "LR-model no-dup data")
 
-
 def print_menu():
     """Prints the available menu options."""
     print("\nOptions:")
     print("1. Print evaluation metrics")
     print("2. Give an utterance for prediction")
     print("3. Exit")
-
-def generate_barplots(df):
-    """
-    Generates a bar plot visualizing the distribution of utterance lengths (number of words) in the given DataFrame.
-
-    Args:
-        df: A Pandas DataFrame with 'label' and 'utterance' columns.
-    """
-
-    # df_counted = df.groupby(['label'])['label'].count().reset_index(name='count')
-    # df.plot.pie(y='label', figsize=(10, 10))
-    # df.label.value_counts().plot(kind='bar', xlabel='Label', ylabel='Count', title='Distribution of dialog act labels in original dataset')
-    count = df['utterance'].str.split().str.len()
-    count.index = count.index.astype(str) + ' words:'
-    # count.sort_index(inplace=True)
-    count.value_counts().plot(logy=True, kind='bar', color='green', title='Distribution of # words per utterance of original dataset')
-    plt.xlabel('# words in utterance', labelpad=12)
-    plt.ylabel('Count')
-
-    plt.tight_layout()
-
-    # Create the 'figures' directory if it doesn't exist
-    figures_dir = "figures"
-    os.makedirs(figures_dir, exist_ok=True)
-    
-    # Save the plot in the 'figures' directory
-    plot_filename = os.path.join(figures_dir, "Number of words per utterance.png")
-    plt.savefig(plot_filename)
-
 
 if __name__ == "__main__":
     # Load the data into a DataFrame
@@ -356,14 +347,13 @@ if __name__ == "__main__":
     X_dup_train, X_dup_test, y_dup_train, y_dup_test = train_test_split(X_dup, y_dup, test_size=0.15, random_state=42)
     X_no_dup_train, X_no_dup_test, y_no_dup_train, y_no_dup_test = train_test_split(X_no_dup, y_no_dup, test_size=0.15, random_state=42)
 
-    # Make predictions on original data for DT and LR
+    # Train and make predictions on original data for DT and LR
     DT_model, LR_model, vectorizer = train_DT_LR(X_dup_train, y_dup_train)
     y_dup_pred_DT, y_dup_pred_LR = predict_DT_LR(DT_model, LR_model, vectorizer, X_dup_test)
 
-    # Make predictions on no dup test set for DT and LR
+    # Train and make predictions on data without duplicated utterances for DT and LR
     DT_model_no_dup, LR_model_no_dup, vectorizer_no_dup = train_DT_LR(X_no_dup_train, y_no_dup_train)
     y_no_dup_pred_DT, y_no_dup_pred_LR = predict_DT_LR(DT_model_no_dup, LR_model_no_dup, vectorizer_no_dup, X_no_dup_test)
-   
 
     while True:
         # Display the menu
@@ -372,10 +362,12 @@ if __name__ == "__main__":
         # Get input from the user
         choice = input("\nEnter your choice (1/2/3): ").strip()
 
-        if choice == '1':
-            # Print evaluation metrics
-            print_metrics_for_each_model(df, X_dup_test, y_dup_test, y_no_dup_test, y_dup_pred_DT, y_dup_pred_LR, y_no_dup_pred_DT, y_no_dup_pred_LR)
+        if choice == '1': 
+            # Print evaluation metrics for baseline models using original data (with duplicated utterances)  
+            print_metrics_for_baseline_models(df, X_dup_test, y_dup_test)
 
+            # Print evaluation metrics for baseline models using both original data and data without duplicated utterances
+            print_metrics_for_DT_LR(y_dup_test, y_dup_pred_DT, y_dup_pred_LR, y_no_dup_test, y_no_dup_pred_DT, y_no_dup_pred_LR)
 
         elif choice == '2':
             while True:
@@ -387,6 +379,7 @@ if __name__ == "__main__":
                     print("Exiting...")
                     break
 
+                # Transform the user utterance with the vectorizer
                 user_utterance_vec = vectorizer.transform([user_utterance])
 
                 # Predict labels using DT and LR models
@@ -397,7 +390,6 @@ if __name__ == "__main__":
                 print(f"Predicted Label (Decision Tree): {y_pred_DT}")
                 print(f"Predicted Label (Logistic Regression): {y_pred_LR}")
                 
-
         elif choice == '3':
             # Exit the program
             print("Exiting...")
