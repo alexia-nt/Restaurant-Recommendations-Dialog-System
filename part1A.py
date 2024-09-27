@@ -36,7 +36,16 @@ def create_dataframe(data_file):
     return df
 
 def create_dataframe_no_dup(df):
+    """
+    Removes duplicate utterances from a DataFrame and writes the result to a new file.
 
+    Args:
+        df: A Pandas DataFrame with 'label' and 'utterance' columns.
+
+    Returns:
+        df_no_dup: A new DataFrame with duplicate utterances removed.
+    """
+    
     # remove \n to avoid newlines in no dup file
     df['utterance'] =  df['utterance'].str.replace('\n', '')
 
@@ -80,6 +89,7 @@ def majority_label_model_predict(df, X_test):
     Returns:
         y_pred: A list of predicted labels (the majority label).
     """
+
     y_pred = []
     majority_label = return_majority_label(df)
     for _ in X_test: # for every utterance in X_test
@@ -88,7 +98,7 @@ def majority_label_model_predict(df, X_test):
 
 def rule_based_model_get_label(utterance):
     """
-    Predicts the label based on keyword matching rules using a dictionary.
+    Predicts the label of an utterance based on keyword matching rules using a dictionary.
 
     Args:
         utterance: The input utterance.
@@ -137,12 +147,26 @@ def rule_based_model_predict(X_test):
     Returns:
         y_pred: A list of predicted labels corresponding to the test utterances.
     """
+
     y_pred = []
     for utterance in X_test:
         y_pred.append(rule_based_model_get_label(utterance))
     return y_pred
 
 def train_DT_LR(X_train, y_train):
+    """
+    Trains Decision Tree and Logistic Regression models on the given training data.
+
+    Args:
+        X_train: A list or array containing the training utterances (text data).
+        y_train: A list or array containing the corresponding labels for the training utterances.
+
+    Returns:
+        DT_model: The trained Decision Tree model.
+        LR_model: The trained Logistic Regression model.
+        vectorizer: The fitted CountVectorizer object.
+    """
+
     vectorizer = CountVectorizer()
     X_bow_train = vectorizer.fit_transform(X_train)
     # X_bow_test = vectorizer.transform(X_test)
@@ -158,6 +182,19 @@ def train_DT_LR(X_train, y_train):
     return DT_model, LR_model, vectorizer
 
 def predict_DT_LR(DT_model, LR_model, vectorizer, X_test):
+    """
+    Predicts labels for the test data using the trained Decision Tree and Logistic Regression models.
+
+    Args:
+        DT_model: The trained Decision Tree model.
+        LR_model: The trained Logistic Regression model.
+        vectorizer: The fitted CountVectorizer object.
+        X_test: A list or array containing the new utterances for prediction.
+
+    Returns:
+        Y_pred_DT: A list or array containing the predicted labels for the test data using the Decision Tree model.
+        Y_pred_LR: A list or array containing the predicted labels for the test data using the Logistic Regression model.
+    """
 
     X_bow_test = vectorizer.transform(X_test)
     Y_pred_DT = DT_model.predict(X_bow_test)
@@ -175,6 +212,7 @@ def save_confusion_matrix(y_test, y_pred, model_name):
         y_pred: A list of the predicted labels for the test set.
         model_name: A string with the name of the model for evaluation.
     """
+
     # labels = ["ack", "affirm", "bye", "confirm", "deny", "hello", "inform", "negate", "null", "repeat", "reqalts", "require", "request", "restart", "thankyou"]
     
     # Get the unique labels from the test set and sort to keep labels in the correct order
@@ -231,13 +269,15 @@ def print_metrics(y_test, y_pred, model_name):
 
 def print_metrics_for_each_model(df, X_dup_test, y_dup_test, y_no_dup_test, y_dup_pred_DT, y_dup_pred_LR, y_no_dup_pred_DT, y_no_dup_pred_LR):
     """
-    Prints evaluation metrics for both the majority-label model and the rule-based model.
+    Prints evaluation metrics for alld the models (majority-label model,
+    rule-based model, decision tree and logistic regression).
 
     Args:
         df: The DataFrame containing the training data.
         X_test: A list of test utterances.
         y_test: A list of the actual labels for the test utterances.
     """
+    
     # Make predictions and print metrics for the majority label model
     print("\nMajority-Label Model - Evaluation Metrics:")
     y_pred_ml = majority_label_model_predict(df, X_dup_test)
@@ -269,6 +309,13 @@ def print_menu():
     print("3. Exit")
 
 def generate_barplots(df):
+    """
+    Generates a bar plot visualizing the distribution of utterance lengths (number of words) in the given DataFrame.
+
+    Args:
+        df: A Pandas DataFrame with 'label' and 'utterance' columns.
+    """
+
     # df_counted = df.groupby(['label'])['label'].count().reset_index(name='count')
     # df.plot.pie(y='label', figsize=(10, 10))
     # df.label.value_counts().plot(kind='bar', xlabel='Label', ylabel='Count', title='Distribution of dialog act labels in original dataset')
