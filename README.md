@@ -19,12 +19,19 @@ The system provides the following options in the terminal:
 3. Exit
 
 ## Part1B.py
+The state diagram for this part of the project is the following:
+
+![part1B](https://github.com/user-attachments/assets/19366b43-edde-41a2-b66f-1ddcee64dc6d)
 
 The system asks the user which model to use for dialog act classification (Linear Regression Model / Decision Tree Model / Rule Based Model).
 
 Then the conversation starts.
 
 ## Part1C.py
+The state diagram for this part of the project is the following:
+
+![part1C](https://github.com/user-attachments/assets/7627695e-a3f9-48b8-9a52-0097bf8c6d6f)
+
 We implemented the following configurabilities building upon part1B.py:
 1. Use one of the baselines for dialog act recognition instead of the machine learning classifier.
 2. Levenshtein edit distance for preference extraction.
