@@ -450,7 +450,7 @@ class RestaurantRecommendationSystem:
                 self.filtered_df.loc[index, "assignedseats"] = 1
                 self.filtered_df.loc[index, "romantic"] = 0
 
-        print(self.filtered_df)
+        # print(self.filtered_df)
 
     def get_matching_restaurants(self):
         """
@@ -535,7 +535,7 @@ class RestaurantRecommendationSystem:
             #Filter the restaurants based on the additional preference
             self.filtered_df = self.filtered_df[self.filtered_df['romantic'] == 1]
 
-        print(self.filtered_df)
+        # print(self.filtered_df)
 
         return self.filtered_df.to_dict(orient='records')
         
