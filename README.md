@@ -11,12 +11,53 @@ The following packages are required:
 - **matplotlib**: For plotting graphs and visualizations.
 - **Levenshtein**: For calculating Levenshtein distance.
 
-## Part1A.py
+## Data
 
-The system provides the following options in the terminal:
+The dataset (dialog_acts.dat) has the following format: **dialog_act [space] utterance_content** and is used to train models for dialog act classification.
+
+There are 15 dialog acts in the dataset, listed in the following table:
+| Dialog Act | Description                                      | Example Sentence                                |
+|------------|--------------------------------------------------|-------------------------------------------------|
+| ack        | Acknowledgment                                   | okay um                                         |
+| affirm     | Positive confirmation                            | yes right                                       |
+| bye        | Greeting at the end of the dialog                | see you good bye                                |
+| confirm    | Check if given information confirms to query     | is it in the center of town                     |
+| deny       | Reject system suggestion                         | I don't want Vietnamese food                    |
+| hello      | Greeting at the start of the dialog              | hi I want a restaurant                          |
+| inform     | State a preference or other information          | I'm looking for a restaurant that serves seafood|
+| negate     | Negation                                         | no in any area                                  |
+| null       | Noise or utterance without content               | cough                                           |
+| repeat     | Ask for repetition                               | can you repeat that                             |
+| reqalts    | Request alternative suggestions                  | how about Korean food                           |
+| reqmore    | Request more suggestions                         | more                                            |
+| request    | Ask for information                              | what is the post code                           |
+| restart    | Attempt to restart the dialog                    | okay start over                                 |
+| thankyou   | Express thanks                                   | thank you good bye                              |
+
+## Part1A.py
+The program provides the following options in the terminal:
+```
 1. Print evaluation metrics
 2. Give an utterance for prediction
 3. Exit
+```
+
+The following four models are trained for dialog act classification:
+- **Majority-Label Model**: This model predicts the most common label in the training data for all inputs.
+- **Rule-Based Model**: This model uses predefined rules to classify utterances based on keywords.
+- **Decision Tree Model**: This is a decision tree machine learning model implemented using sklearn.
+- **Logistic Regression Model**: This is a logistic regression machine learning model implemented using sklearn.
+
+If the user chooses the first option, the program print the evaluation metrics for these models.
+
+If the user chooses the second option, the user can enter an utterance and the system provides two dialog act classifications of this utterance based on the decision tree and the logistic regression model respectively.
+
+For example:
+```
+Enter an utterance (or type '0' to go to menu): i want to find a restaurant
+Predicted Label (Decision Tree): inform
+Predicted Label (Logistic Regression): inform
+```
 
 ## Part1B.py
 The state diagram for this part of the project is the following:
