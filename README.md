@@ -1,6 +1,14 @@
 # Restaurant-Recommendations-Dialog-System
 This is a restaurant recommendations dialog system.
 
+## Table of Contents
+
+- [Installation Requirements](#installation-requirements)
+- [Data](#data)
+- [Part 1A](#part-1a)
+- [Part 1B](#part-1b)
+- [Part 1C](#part-1c)
+
 ## Installation Requirements
 
 To run this project, you need to have **Python 3.x** installed on your machine.
@@ -34,8 +42,8 @@ There are 15 dialog acts in the dataset, listed in the following table:
 | restart    | Attempt to restart the dialog                    | okay start over                                 |
 | thankyou   | Express thanks                                   | thank you good bye                              |
 
-## Part1A.py
-The program provides the following options in the terminal:
+## Part 1A
+The program (part1A.py) provides the following options in the terminal:
 ```
 1. Print evaluation metrics
 2. Give an utterance for prediction
@@ -59,8 +67,8 @@ Predicted Label (Decision Tree): inform
 Predicted Label (Logistic Regression): inform
 ```
 
-## Part1B.py
-This part of the project consists of modeling and implementing a dialog management system for restaurant recommendations.
+## Part 1B
+This part of the project (part1B.py) consists of modeling and implementing a dialog management system for restaurant recommendations.
 
 The restaurant_info.csv file contains information for various restaurants with the following features:
 - **restaurant name**
@@ -79,8 +87,8 @@ The system asks the user which model to use for dialog act classification (Linea
 
 Then the conversation starts.
 
-## Part1C.py
-This part of the project extends part1B.py by adding a simple reasoning component and some congigurabilities.
+## Part 1C
+This part of the project (part1C.py) extends part1B.py by adding a simple reasoning component and some congigurabilities.
 
 More specifically, the following features (columns) are added to the DataFrame that contains the restaurant information:
 - **food quality** (good / bad)
