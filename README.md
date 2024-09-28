@@ -81,7 +81,7 @@ The restaurant_info.csv file contains information for various restaurants with t
 
 The state diagram for this part of the project is the following:
 
-![part1B](https://github.com/user-attachments/assets/0d36d84e-f0d3-423b-8be7-69687d1ee5cc)
+![part1B](figures/Diagram-Part1B.png)
 
 The system asks the user which model to use for dialog act classification (Linear Regression Model / Decision Tree Model / Rule Based Model).
 
@@ -112,7 +112,7 @@ The following inference rules are utilized to determine additional restaurant pr
 
 The "11. ADDITIONAL PREFERENCES STATE" is added, extending the previous diagram:
 
-![part1C](https://github.com/user-attachments/assets/6be16892-c7a3-47a9-a2be-8fedfb0a8dda)
+![part1B](figures/Diagram-Part1C.png)
 
 We implemented the following configurabilities building upon part1B.py:
 1. Use one of the baselines for dialog act recognition instead of the machine learning classifier.
