@@ -8,6 +8,7 @@ This is a restaurant recommendations dialog system.
 - [Part 1A](#part-1a)
 - [Part 1B](#part-1b)
 - [Part 1C](#part-1c)
+- [Example Dialog](#example-dialog)
 
 ## Installation Requirements
 
@@ -129,4 +130,49 @@ Then the system asks if the user want a small delay in the system responses so t
 
 After having extracted the user preferences, the conversation starts.
 
+## Example Dialog
+```
+Options:
+1. Linear Regression Model
+2. Decision Tree Model
+3. Rule Based Model
+
+Enter your model choice (1/2/3).
+>>3
+
+Set Levenshtein distance threshold for preference extraction.
+(Enter '1', '2', '3' or '0' to ignore Levenshtein distance).
+>>2
+
+Do you want a short delay before showing system responses?
+('1' for Yes, '0' for No)
+>>0
+
+Starting conversation...
+
+Hello, welcome to the restaurant recommendations dialogue system! You can ask for restaurants by area, price range, or food type.
+>>Hello, I want a birtish restaurant at any area.
+What price range do you want?
+>>Whatever price.
+Ok, I am searching for a restaurant based on the following preferences: british restaurant at any price in any area...
+I found  10  restaurants based on your preferences.
+Do you have additional requirements?
+>>Yes, I want it to be romantic.
+Dialog act:  affirm
+Ok, searching with romantic as additional preference...
+I found  3  restaurants based on your additional preferences.
+saint johns chop house is a nice restaurant serving british food.
+>>Can you give me the address?
+Dialog act:  request
+I have the following details for saint johns chop house restaurant:
+The phone number is 01223 353110.
+The address is 21 - 24 northampton street.
+The post code is c.b 3.
+>>Do you have any other recommendations?
+Dialog act:  reqmore
+the oak bistro is another nice restaurant serving british food.
+>>Thank you, bye!
+Dialog act:  bye
+I hope I was helpful, goodbye!
+```
 
