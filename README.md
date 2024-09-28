@@ -60,18 +60,40 @@ Predicted Label (Logistic Regression): inform
 ```
 
 ## Part1B.py
+This part of the project consists of modeling and implementing a dialog management system for restaurant recommendations.
+
+The restaurant_info.csv file contains information for various restaurants with the following features:
+- **restaurant name**
+- **price range** (moderate / expensive / cheap)
+- **area** (north / south / east / west / centre)
+- **food**
+- **phone**
+- **address**
+- **postcode**
+
 The state diagram for this part of the project is the following:
 
-![part1B](https://github.com/user-attachments/assets/19366b43-edde-41a2-b66f-1ddcee64dc6d)
+![part1B](https://github.com/user-attachments/assets/0d36d84e-f0d3-423b-8be7-69687d1ee5cc)
 
 The system asks the user which model to use for dialog act classification (Linear Regression Model / Decision Tree Model / Rule Based Model).
 
 Then the conversation starts.
 
 ## Part1C.py
-The state diagram for this part of the project is the following:
+This part of the project extends part1B.py.
 
-![part1C](https://github.com/user-attachments/assets/7627695e-a3f9-48b8-9a52-0097bf8c6d6f)
+More specifically, the following features (columns) are added to the DataFrame that contains the restaurant information:
+- **food quality** (good / bad)
+- **crowdedness** (busy / quiet)
+- **length of stay** (long / short)
+- **touristic** (0 / 1)
+- **assigned seats** (0 / 1)
+- **children** (0 / 1)
+- **romantic** (0 / 1)
+
+The "11. ADDITIONAL PREFERENCES STATE" is added, extending the previous diagram:
+
+![part1C](https://github.com/user-attachments/assets/6be16892-c7a3-47a9-a2be-8fedfb0a8dda)
 
 We implemented the following configurabilities building upon part1B.py:
 1. Use one of the baselines for dialog act recognition instead of the machine learning classifier.
