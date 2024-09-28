@@ -785,7 +785,7 @@ class RestaurantRecommendationSystem:
     
         # Additional preference has been extracted
         time.sleep(self.delay_preference)
-        print(f"Ok, searching with {self.additional_preference} as additional preference..")
+        print(f"Ok, searching with {self.additional_preference} as additional preference...")
 
         # Get matching restaurants taking additional preferences into account
         self.possible_restaurants = self.get_matching_restaurants_with_additional_preference()
