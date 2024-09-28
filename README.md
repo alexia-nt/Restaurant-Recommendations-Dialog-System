@@ -80,7 +80,7 @@ The system asks the user which model to use for dialog act classification (Linea
 Then the conversation starts.
 
 ## Part1C.py
-This part of the project extends part1B.py.
+This part of the project extends part1B.py by adding a simple reasoning component and some congigurabilities.
 
 More specifically, the following features (columns) are added to the DataFrame that contains the restaurant information:
 - **food quality** (good / bad)
@@ -90,6 +90,17 @@ More specifically, the following features (columns) are added to the DataFrame t
 - **assigned seats** (0 / 1)
 - **children** (0 / 1)
 - **romantic** (0 / 1)
+
+The following inference rules are utilized to determine additional restaurant properties based on the initial input:
+
+| ID | Antecedent              | Consequent     | True/False | Description                                                                   |
+|----|-------------------------|----------------|------------|-------------------------------------------------------------------------------|
+| 1  | cheap AND good food     | touristic      | True       | A cheap restaurant with good food attracts tourists.                          |
+| 2  | romanian                | touristic      | False      | Romanian cuisine is often unknown to most tourists, who prefer familiar food. |
+| 3  | busy                    | assigned seats | True       | In a busy restaurant, the waiter typically decides where you sit.             |
+| 4  | long stay               | children       | False      | Spending a long time in a restaurant is not advised when dining with children.|
+| 5  | busy                    | romantic       | False      | A busy restaurant atmosphere is generally not considered romantic.            |
+| 6  | long stay               | romantic       | True       | Spending a long time in a restaurant can create a romantic atmosphere.        |
 
 The "11. ADDITIONAL PREFERENCES STATE" is added, extending the previous diagram:
 
