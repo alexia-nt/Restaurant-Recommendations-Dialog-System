@@ -752,7 +752,7 @@ class RestaurantRecommendationSystem:
             
             self.user_input = input(">>").lower()
 
-            return self.found_restaurant_for_recommendation()
+            return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
     
     def additional_preferences_handler(self):
         """
@@ -787,7 +787,7 @@ class RestaurantRecommendationSystem:
                     time.sleep(self.delay_preference)
                     print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
                     self.user_input = input(">>").lower()
-                    return self.found_restaurant_for_recommendation()
+                    return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
                     
                 if self.additional_preference is None:
                     time.sleep(self.delay_preference)
@@ -821,7 +821,7 @@ class RestaurantRecommendationSystem:
             
             self.user_input = input(">>").lower()
 
-            return self.found_restaurant_for_recommendation()
+            return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
     
     def no_more_recommendations_handler(self):
         """
@@ -873,7 +873,7 @@ class RestaurantRecommendationSystem:
             # Get user input and predict dialog act
             self.user_input = input(">>").lower()
 
-            return self.found_restaurant_for_recommendation()
+            return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
         
         # If there are no more restaurants to recommend
         else:
