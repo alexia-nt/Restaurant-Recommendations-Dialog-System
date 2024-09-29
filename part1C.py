@@ -1053,7 +1053,7 @@ def get_delay_preference():
             break
         else:
             # Get input from the user
-            delay_choice = input("\nInvalid choice. Please select a valid option (Yes/No).\n>>")
+            delay_choice = input("\nInvalid choice. Please select a valid option (0/1).\n>>")
     
     return delay_preference
 
