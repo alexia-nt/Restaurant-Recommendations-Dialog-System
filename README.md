@@ -120,7 +120,8 @@ We implemented the following configurabilities building upon part1B.py:
 2. Levenshtein edit distance for preference extraction.
 3. Introduce a delay before showing system responses.
 4. Allow users to change their preferences or not.
-5. Allow preferences to be stated in a single utterance only.
+
+Another feature we added was to allow preferences to be stated in a single utterance only. It is not configurable as it is integrated into the state diagram, but we feel it improves the experience of interacting with the system.
 
 The system asks the user which model to use for dialog act classification (Linear Regression Model / Decision Tree Model / Rule Based Model).
 
