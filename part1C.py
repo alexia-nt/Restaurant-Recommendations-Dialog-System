@@ -779,6 +779,16 @@ class RestaurantRecommendationSystem:
 
                 self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
 
+
+                dialog_act = self.dialog_act_prediction()
+                print("Dialog act: ", dialog_act)
+
+                if dialog_act in ("negate","deny"):
+                    time.sleep(self.delay_preference)
+                    print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
+                    self.user_input = input(">>").lower()
+                    return self.found_restaurant_for_recommendation()
+                    
                 if self.additional_preference is None:
                     time.sleep(self.delay_preference)
                     print("Please give a valid additional preference.")
