@@ -779,7 +779,6 @@ class RestaurantRecommendationSystem:
 
                 self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
 
-
                 dialog_act = self.dialog_act_prediction()
                 print("Dialog act: ", dialog_act)
 
