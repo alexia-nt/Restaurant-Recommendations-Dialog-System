@@ -690,7 +690,6 @@ class RestaurantRecommendationSystem:
         """
 
         dialog_act = self.dialog_act_prediction()
-        print("Dialog act: ", dialog_act)
 
         # If dialog act is bye, ack, or affirm, go to the "end" state
         if dialog_act in ("bye", "ack", "affirm"):
@@ -742,7 +741,6 @@ class RestaurantRecommendationSystem:
             self.user_input = input(">>").lower()
 
             dialog_act = self.dialog_act_prediction()
-            print("Dialog act: ", dialog_act)
 
             if dialog_act not in ("negate","deny"):
                 return self.ADDITIONAL_PREFERENCES_STATE
@@ -780,7 +778,6 @@ class RestaurantRecommendationSystem:
                 self.additional_preference = self.extract_additional_preference(self.user_input, self.ADDITIONAL_PREFERENCES_KEYWORDS)
 
                 dialog_act = self.dialog_act_prediction()
-                print("Dialog act: ", dialog_act)
 
                 if dialog_act in ("negate","deny"):
                     time.sleep(self.delay_preference)
@@ -834,7 +831,6 @@ class RestaurantRecommendationSystem:
 
         # Predict dialog act
         dialog_act = self.dialog_act_prediction()
-        print("Dialog act: ", dialog_act)
 
         # If dialog act is bye, negate or deny, go to "end" state
         if dialog_act in ("bye","negate","deny"):
@@ -896,7 +892,6 @@ class RestaurantRecommendationSystem:
 
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
-        print("Dialog act: ", dialog_act)
 
         # If dialog act is bye, ack, or affirm, go to the "end" state
         if dialog_act in ("bye", "ack", "affirm"):
