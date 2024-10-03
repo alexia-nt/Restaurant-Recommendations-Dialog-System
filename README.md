@@ -159,21 +159,17 @@ Ok, I am searching for a restaurant based on the following preferences: british 
 I found  10  restaurants based on your preferences.
 Do you have additional requirements?
 >>Yes, I want it to be romantic.
-Dialog act:  affirm
 Ok, searching with romantic as additional preference...
 I found  3  restaurants based on your additional preferences.
 saint johns chop house is a nice restaurant serving british food.
 >>Can you give me the address?
-Dialog act:  request
 I have the following details for saint johns chop house restaurant:
 The phone number is 01223 353110.
 The address is 21 - 24 northampton street.
 The post code is c.b 3.
 >>Do you have any other recommendations?
-Dialog act:  reqmore
 the oak bistro is another nice restaurant serving british food.
 >>Thank you, bye!
-Dialog act:  bye
 I hope I was helpful, goodbye!
 ```
 
