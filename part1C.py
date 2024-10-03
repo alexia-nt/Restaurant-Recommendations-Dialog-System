@@ -804,6 +804,7 @@ class RestaurantRecommendationSystem:
                     print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
                     print("Do you want details for this restaurant?")
                     self.user_input = input(">>").lower()
+                    
                     return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
                     
                 if self.additional_preference is None:
@@ -886,7 +887,6 @@ class RestaurantRecommendationSystem:
             time.sleep(self.delay_preference)
             print(f"{self.possible_restaurants[0]['restaurantname']} is another nice restaurant serving {self.possible_restaurants[0]['food']} food.")
             print("Do you want details for this restaurant?")
-            # Get user input and predict dialog act
             self.user_input = input(">>").lower()
 
             return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
