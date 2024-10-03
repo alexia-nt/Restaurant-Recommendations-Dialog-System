@@ -519,7 +519,7 @@ class RestaurantRecommendationSystem:
                 print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
         
         if gave_details == False:
-            print("Which exact details do you want?")
+            print("What details do you want?")
             self.user_input = input(">>").lower() 
             while not any(word in self.user_input for word in ["phone", "number", "address", "post", "code"]):
                 print("Please give a valid detail (phone number, address, post code).")
@@ -712,11 +712,13 @@ class RestaurantRecommendationSystem:
         dialog_act = self.dialog_act_prediction()
 
         # If dialog act is bye, ack, or affirm, go to the "end" state
-        if dialog_act in ("bye", "ack", "affirm"):
+        # if dialog_act in ("bye", "ack", "affirm"):
+        if dialog_act in ("bye"):
             return self.END_STATE
         
         # If the user requests details of the recommended restaurant
-        elif dialog_act == "request":
+        # elif dialog_act == "request":
+        elif dialog_act in ("request", "ack", "affirm"):
             return self.GIVE_DETAILS_STATE
         
         # Default case, continue recommending more restaurants
@@ -767,7 +769,7 @@ class RestaurantRecommendationSystem:
             
             time.sleep(self.delay_preference)
             print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
-            
+            print("Do you want details for this restaurant?")
             self.user_input = input(">>").lower()
 
             return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
@@ -802,6 +804,7 @@ class RestaurantRecommendationSystem:
                 if dialog_act in ("negate","deny"):
                     time.sleep(self.delay_preference)
                     print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
+                    print("Do you want details for this restaurant?")
                     self.user_input = input(">>").lower()
                     return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
                     
@@ -834,7 +837,7 @@ class RestaurantRecommendationSystem:
 
             time.sleep(self.delay_preference)
             print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
-            
+            print("Do you want details for this restaurant?")
             self.user_input = input(">>").lower()
 
             return self.found_restaurant_for_recommendation() # the function returns one of those states: END, GIVE_DETAILS, RECOMMEND_MORE
@@ -884,7 +887,7 @@ class RestaurantRecommendationSystem:
             # Recommend the first restaurant in the list
             time.sleep(self.delay_preference)
             print(f"{self.possible_restaurants[0]['restaurantname']} is another nice restaurant serving {self.possible_restaurants[0]['food']} food.")
-
+            print("Do you want details for this restaurant?")
             # Get user input and predict dialog act
             self.user_input = input(">>").lower()
 
