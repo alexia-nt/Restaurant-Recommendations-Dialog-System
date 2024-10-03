@@ -637,7 +637,7 @@ class RestaurantRecommendationSystem:
             return self.END_STATE
         
         # If dialog act is request, go to the "print details" state
-        if dialog_act in ("request", "ack", "affirm"):
+        if dialog_act in ("request"):
             return self.GIVE_DETAILS_STATE
         
         # Default case, continue recommending more restaurants
