@@ -326,9 +326,9 @@ class RestaurantRecommendationSystem:
         
         # Search for preference matches with Levenshtein distance
         for word in utterance_words:
-            # If the word from user utterance is "want", do not check levenshtein distance,
+            # If the word from user utterance is "want" or "yes", do not check levenshtein distance,
             # because it would be matched as "west" area preference for threshold >=2
-            if word == "want":
+            if word == "want" or word == "yes":
                 continue 
             for keyword in keywords:
                 # Check if any word from the utterance matches part of a multi-word keyword
