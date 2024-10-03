@@ -66,7 +66,7 @@ class RestaurantRecommendationSystem:
         'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
         'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
 
-        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search', 'detail'],
+        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone', 'number', 'could i get', 'request', 'find', 'search', 'detail'],
         'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further'],
         'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
 
@@ -244,7 +244,7 @@ class RestaurantRecommendationSystem:
         for word in utterance_words:
             # If the word from user utterance is "want", do not check levenshtein distance,
             # because it would be matched as "west" area preference for threshold >=2
-            if word == "want":
+            if word == "want" or word == "yes":
                 continue 
             for keyword in keywords:
                 # Check if any word from the utterance matches part of a multi-word keyword
@@ -331,22 +331,41 @@ class RestaurantRecommendationSystem:
         """
         Prints the available details for the recommended restaurant.
         """
-        print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant:")
-        if(pd.isna(self.possible_restaurants[0]['phone'])):
-            print("I don't have an available phone number.")
-        else:
-            print(f"The phone number is {self.possible_restaurants[0]['phone']}.")
+        gave_details = False
+
+        # Check if the user asks for the phone number
+        if ("phone" in self.user_input) or ("number" in self.user_input):
+            gave_details = True
+            if(pd.isna(self.possible_restaurants[0]['phone'])):
+                print("I don't have an available phone number.")
+            else:
+                print(f"The phone number is {self.possible_restaurants[0]['phone']}.")
         
-        if(pd.isna(self.possible_restaurants[0]['addr'])):
-            print("I don't have an available address.")
-        else:
-            print(f"The address is {self.possible_restaurants[0]['addr']}.")
+        # Check if the user asks for the address
+        if "address" in self.user_input:
+            gave_details = True
+            if(pd.isna(self.possible_restaurants[0]['addr'])):
+                print("I don't have an available address.")
+            else:
+                print(f"The address is {self.possible_restaurants[0]['addr']}.")
         
-        if(pd.isna(self.possible_restaurants[0]['postcode'])):
-            print("I don't have an available post code.")
-        else:
-            print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
-    
+        # Check if the user asks for the post code
+        if ("post" in self.user_input) or ("code" in self.user_input):
+            gave_details = True
+            if(pd.isna(self.possible_restaurants[0]['postcode'])):
+                print("I don't have an available post code.")
+            else:
+                print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
+        
+        if gave_details == False:
+            print("What details do you want?")
+            self.user_input = input(">>").lower() 
+            while not any(word in self.user_input for word in ["phone", "number", "address", "post", "code"]):
+                print("Please give a valid detail (phone number, address, post code).")
+                self.user_input = input(">>").lower()
+            
+        return gave_details
+        
     def rule_based_model_get_label(self):
         """
         Determines the dialog act label using the Rule-Based model
@@ -492,11 +511,11 @@ class RestaurantRecommendationSystem:
         dialog_act = self.dialog_act_prediction()
 
         # If dialog act is bye, ack, or affirm, go to the "end" state
-        if dialog_act in ("bye", "ack", "affirm"):
+        if dialog_act in ("bye"):
             return self.END_STATE
         
         # If the user requests details of the recommended restaurant
-        elif dialog_act == "request":
+        elif dialog_act in ("request", "ack", "affirm"):
             return self.GIVE_DETAILS_STATE
         
         # Default case, continue recommending more restaurants
@@ -532,7 +551,7 @@ class RestaurantRecommendationSystem:
                 print("I found ", len(self.possible_restaurants), " restaurants based on your preferences.")
 
             print(f"{self.possible_restaurants[0]['restaurantname']} is a nice restaurant serving {self.possible_restaurants[0]['food']} food.")
-            
+            print("Do you want details for this restaurant?")
             self.user_input = input(">>").lower()
 
             return self.found_restaurant_for_recommendation()
@@ -582,7 +601,7 @@ class RestaurantRecommendationSystem:
 
             # Recommend the first restaurant in the list
             print(f"{self.possible_restaurants[0]['restaurantname']} is another nice restaurant serving {self.possible_restaurants[0]['food']} food.")
-
+            print("Do you want details for this restaurant?")
             # Get user input and predict dialog act
             self.user_input = input(">>").lower()
 
@@ -605,14 +624,22 @@ class RestaurantRecommendationSystem:
         - (int): The next state (END or RECOMMEND_MORE)
         """
 
-        self.print_details()
+        gave_details = dialog_act = self.print_details()
+
+        # If no details were printed, go back to "give details" state
+        if gave_details == False:
+            return self.GIVE_DETAILS_STATE
 
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
         
-        # If dialog act is bye, ack, or affirm, go to the "end" state
-        if dialog_act in ("bye", "ack", "affirm"):
+        # If dialog act is bye, go to the "end" state
+        if dialog_act in ("bye"):
             return self.END_STATE
+        
+        # If dialog act is request, go to the "print details" state
+        if dialog_act in ("request", "ack", "affirm"):
+            return self.GIVE_DETAILS_STATE
         
         # Default case, continue recommending more restaurants
         else:

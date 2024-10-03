@@ -711,13 +711,11 @@ class RestaurantRecommendationSystem:
 
         dialog_act = self.dialog_act_prediction()
 
-        # If dialog act is bye, ack, or affirm, go to the "end" state
-        # if dialog_act in ("bye", "ack", "affirm"):
+        # If dialog act is bye, go to the "end" state
         if dialog_act in ("bye"):
             return self.END_STATE
         
         # If the user requests details of the recommended restaurant
-        # elif dialog_act == "request":
         elif dialog_act in ("request", "ack", "affirm"):
             return self.GIVE_DETAILS_STATE
         
