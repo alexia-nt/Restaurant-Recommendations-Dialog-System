@@ -151,27 +151,32 @@ Do you want a short delay before showing system responses?
 
 Starting conversation...
 
-Hello, welcome to the restaurant recommendations dialogue system! You can ask for restaurants by area, price range, or food type.
+Hello, welcome to the restaurant recommendations dialogue system!
+You can ask for restaurants by area, price range, or food type.
 >>Hello, I want a birtish restaurant at any area.
 What price range do you want?
 >>Whatever price.
-Ok, I am searching for a restaurant based on the following preferences: british restaurant at any price in any area...
+Ok, I am searching for a restaurant based on the following preferences:
+british restaurant at any price in any area...
 I found  10  restaurants based on your preferences.
 Do you have additional requirements?
 >>Yes, I want it to be romantic.
 Ok, searching with romantic as additional preference...
 I found  2  restaurants based on your additional preferences.
-grafton hotel restaurant is a nice restaurant serving british food.
->>Can you give me details?
-Which exact details do you want?
->>I want the address and the phone number.
-The phone number is 01223 241387.
-The address is grafton hotel 619 newmarket road fen ditton.
+fitzbillies restaurant is a nice restaurant serving british food.
+Do you want details for this restaurant?
+>>Yes.
+What details do you want?
+>>I want the address.
+The address is 51 trumpington street city centre.
+>>Can you also give me the phone number?
+The phone number is 01223 352500.
 >>Do you have any other recommendations?
-the oak bistro is another nice restaurant serving british food.
->>Can you give me the address?
-The address is 6 lensfield road.
->>Thank you, bye!
+the cambridge chop house is another nice restaurant serving british food.
+Do you want details for this restaurant?
+>>No, thanks.
+There are no more restaurants to recommend. Do you want something else?
+>>No, bye.
 I hope I was helpful, goodbye!
 ```
 
