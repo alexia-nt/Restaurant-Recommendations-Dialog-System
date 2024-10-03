@@ -76,7 +76,7 @@ class RestaurantRecommendationSystem:
         'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
         'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
 
-        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone number', 'could i get', 'request', 'find', 'search', 'detail'],
+        'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone', 'number', 'could i get', 'request', 'find', 'search', 'detail'],
         'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further'],
         'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
 
@@ -484,28 +484,42 @@ class RestaurantRecommendationSystem:
         """
         Prints the available details for the recommended restaurant.
         """
-        time.sleep(self.delay_preference)
-        print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant:")
-        if(pd.isna(self.possible_restaurants[0]['phone'])):
-            time.sleep(self.delay_preference)
-            print("I don't have an available phone number.")
-        else:
-            time.sleep(self.delay_preference)
-            print(f"The phone number is {self.possible_restaurants[0]['phone']}.")
+        # time.sleep(self.delay_preference)
+        # print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant:")
+        gave_details = False
+
+        # Check if the user asks for the phone number
+        if ("phone" in self.user_input) or ("number" in self.user_input):
+            gave_details = True
+            if(pd.isna(self.possible_restaurants[0]['phone'])):
+                time.sleep(self.delay_preference)
+                print("I don't have an available phone number.")
+            else:
+                time.sleep(self.delay_preference)
+                print(f"The phone number is {self.possible_restaurants[0]['phone']}.")
         
-        if(pd.isna(self.possible_restaurants[0]['addr'])):
-            time.sleep(self.delay_preference)
-            print("I don't have an available address.")
-        else:
-            time.sleep(self.delay_preference)
-            print(f"The address is {self.possible_restaurants[0]['addr']}.")
+        # Check if the user asks for the address
+        if "address" in self.user_input:
+            gave_details = True
+            if(pd.isna(self.possible_restaurants[0]['addr'])):
+                time.sleep(self.delay_preference)
+                print("I don't have an available address.")
+            else:
+                time.sleep(self.delay_preference)
+                print(f"The address is {self.possible_restaurants[0]['addr']}.")
         
-        if(pd.isna(self.possible_restaurants[0]['postcode'])):
-            time.sleep(self.delay_preference)
-            print("I don't have an available post code.")
-        else:
-            time.sleep(self.delay_preference)
-            print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
+        # Check if the user asks for the post code
+        if ("post" in self.user_input) or ("code" in self.user_input):
+            gave_details = True
+            if(pd.isna(self.possible_restaurants[0]['postcode'])):
+                time.sleep(self.delay_preference)
+                print("I don't have an available post code.")
+            else:
+                time.sleep(self.delay_preference)
+                print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
+        
+        if gave_details == False:
+            print("Which exact details do you want?")
 
     def get_matching_restaurants_with_additional_preference(self):
         """
@@ -892,6 +906,10 @@ class RestaurantRecommendationSystem:
 
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
+
+        # If dialog act is request, go to the "print details" state
+        if dialog_act in ("request"):
+            return self.GIVE_DETAILS_STATE
 
         # If dialog act is bye, ack, or affirm, go to the "end" state
         if dialog_act in ("bye", "ack", "affirm"):
