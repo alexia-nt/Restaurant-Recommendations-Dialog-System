@@ -520,6 +520,12 @@ class RestaurantRecommendationSystem:
         
         if gave_details == False:
             print("Which exact details do you want?")
+            self.user_input = input(">>").lower() 
+            while not any(word in self.user_input for word in ["phone", "number", "address", "post", "code"]):
+                print("Please give a valid detail (phone number, address, post code).")
+                self.user_input = input(">>").lower()
+            
+        return gave_details
 
     def get_matching_restaurants_with_additional_preference(self):
         """
@@ -902,7 +908,11 @@ class RestaurantRecommendationSystem:
         - (int): The next state (END or RECOMMEND_MORE)
         """
 
-        self.print_details()
+        gave_details = self.print_details()
+
+        # If no details were printed, go back to "give details" state
+        if gave_details == False:
+            return self.GIVE_DETAILS_STATE
 
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
