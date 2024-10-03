@@ -160,15 +160,17 @@ I found  10  restaurants based on your preferences.
 Do you have additional requirements?
 >>Yes, I want it to be romantic.
 Ok, searching with romantic as additional preference...
-I found  3  restaurants based on your additional preferences.
-saint johns chop house is a nice restaurant serving british food.
->>Can you give me the address?
-I have the following details for saint johns chop house restaurant:
-The phone number is 01223 353110.
-The address is 21 - 24 northampton street.
-The post code is c.b 3.
+I found  2  restaurants based on your additional preferences.
+grafton hotel restaurant is a nice restaurant serving british food.
+>>Can you give me details?
+Which exact details do you want?
+>>I want the address and the phone number.
+The phone number is 01223 241387.
+The address is grafton hotel 619 newmarket road fen ditton.
 >>Do you have any other recommendations?
 the oak bistro is another nice restaurant serving british food.
+>>Can you give me the address?
+The address is 6 lensfield road.
 >>Thank you, bye!
 I hope I was helpful, goodbye!
 ```
