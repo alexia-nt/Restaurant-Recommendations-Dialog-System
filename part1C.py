@@ -75,7 +75,7 @@ class RestaurantRecommendationSystem:
     RULE_BASED_MODEL_RULES = {
         'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone', 'number', 'could i get', 'request', 'find', 'search', 'detail'],
         'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further'],
-        'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
+        'reqalts': ['how about', 'what about', 'change', 'alternative', 'other options', 'different', 'else', 'instead', 'maybe'],
 
         'bye': ['goodbye', 'bye', 'see you', 'farewell', 'later', 'take care', 'talk to you soon'],
         'negate': ['no', 'not', 'don\'t', 'nope', 'none', 'wrong', 'never', 'incorrect'],
