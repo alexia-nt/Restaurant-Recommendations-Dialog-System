@@ -330,6 +330,8 @@ class RestaurantRecommendationSystem:
     def print_details(self):
         """
         Prints the available details for the recommended restaurant.
+        If the user has not specified what details they want, system
+        asks user until a valid answer is given and then prints details.
         """
         gave_details = False
 
@@ -357,6 +359,9 @@ class RestaurantRecommendationSystem:
             else:
                 print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
         
+        if gave_details == True:
+            return
+        
         if gave_details == False:
             print("What details do you want?")
             self.user_input = input(">>").lower() 
@@ -364,7 +369,8 @@ class RestaurantRecommendationSystem:
                 print("Please give a valid detail (phone number, address, post code).")
                 self.user_input = input(">>").lower()
             
-        return gave_details
+            # Recursive call to print details if no details were printed
+            self.print_details()
         
     def rule_based_model_get_label(self):
         """
@@ -623,11 +629,7 @@ class RestaurantRecommendationSystem:
         - (int): The next state (END or RECOMMEND_MORE)
         """
 
-        gave_details = dialog_act = self.print_details()
-
-        # If no details were printed, go back to "give details" state
-        if gave_details == False:
-            return self.GIVE_DETAILS_STATE
+        self.print_details()
 
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
