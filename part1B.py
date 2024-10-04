@@ -361,8 +361,7 @@ class RestaurantRecommendationSystem:
         
         if gave_details == True:
             return
-        
-        if gave_details == False:
+        else:
             print("What details do you want?")
             self.user_input = input(">>").lower() 
             while not any(word in self.user_input for word in ["phone", "number", "address", "post", "code"]):

@@ -483,6 +483,8 @@ class RestaurantRecommendationSystem:
     def print_details(self):
         """
         Prints the available details for the recommended restaurant.
+        If the user has not specified what details they want, system
+        asks user until a valid answer is given and then prints details.
         """
         # time.sleep(self.delay_preference)
         # print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant:")
@@ -517,15 +519,18 @@ class RestaurantRecommendationSystem:
             else:
                 time.sleep(self.delay_preference)
                 print(f"The post code is {self.possible_restaurants[0]['postcode']}.")
-        
-        if gave_details == False:
+
+        if gave_details == True:
+            return
+        else:
             print("What details do you want?")
             self.user_input = input(">>").lower() 
             while not any(word in self.user_input for word in ["phone", "number", "address", "post", "code"]):
                 print("Please give a valid detail (phone number, address, post code).")
                 self.user_input = input(">>").lower()
-            
-        return gave_details
+
+            # Recursive call to print details if no details were printed
+            self.print_details()
 
     def get_matching_restaurants_with_additional_preference(self):
         """
@@ -909,11 +914,7 @@ class RestaurantRecommendationSystem:
         - (int): The next state (END or RECOMMEND_MORE)
         """
 
-        gave_details = self.print_details()
-
-        # If no details were printed, go back to "give details" state
-        if gave_details == False:
-            return self.GIVE_DETAILS_STATE
+        self.print_details()
 
         self.user_input = input(">>").lower()
         dialog_act = self.dialog_act_prediction()
