@@ -911,7 +911,7 @@ class RestaurantRecommendationSystem:
 
         Returns
         --------
-        - (int): The next state (END or RECOMMEND_MORE)
+        - (int): The next state (GIVE_DETAILS or END or SEARCH_MORE)
         """
 
         self.print_details()
