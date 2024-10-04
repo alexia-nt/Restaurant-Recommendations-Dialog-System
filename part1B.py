@@ -510,7 +510,7 @@ class RestaurantRecommendationSystem:
 
         Returns
         --------
-        - (int): next state (END, GIVE_DETAILS, RECOMMEND_MORE)
+        - (int): next state (END, GIVE_DETAILS, RECOMMEND_MORE, ASK_INITIAL_PREFERENCES)
         """
 
         dialog_act = self.dialog_act_prediction()
@@ -633,7 +633,7 @@ class RestaurantRecommendationSystem:
 
         Returns
         --------
-        - (int): The next state (GIVE_DETAILS or END or SEARCH_MORE)
+        - (int): The next state (GIVE_DETAILS, END, SEARCH_MORE, ASK_INITIAL_PREFERENCES)
         """
 
         self.print_details()
