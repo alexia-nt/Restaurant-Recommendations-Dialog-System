@@ -523,6 +523,14 @@ class RestaurantRecommendationSystem:
         elif dialog_act in ("request", "ack", "affirm"):
             return self.GIVE_DETAILS_STATE
         
+        # If dialog act is reqalts, go to the "ask initial preferences" state
+        if dialog_act in ("reqalts"):
+            # Forget previous user preferences by setting the preferences to None
+            self.food_preference = None
+            self.price_preference = None
+            self.area_preference = None
+            return self.ASK_INITIAL_PREFERENCES_STATE
+        
         # Default case, continue recommending more restaurants
         else:
             return self.SEARCH_MORE_STATE
@@ -640,6 +648,14 @@ class RestaurantRecommendationSystem:
         # If dialog act is request, go to the "print details" state
         if dialog_act in ("request"):
             return self.GIVE_DETAILS_STATE
+        
+        # If dialog act is reqalts, go to the "ask initial preferences" state
+        if dialog_act in ("reqalts"):
+            # Forget previous user preferences by setting the preferences to None
+            self.food_preference = None
+            self.price_preference = None
+            self.area_preference = None
+            return self.ASK_INITIAL_PREFERENCES_STATE
         
         # Default case, continue recommending more restaurants
         else:
