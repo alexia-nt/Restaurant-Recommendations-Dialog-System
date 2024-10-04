@@ -63,9 +63,6 @@ class RestaurantRecommendationSystem:
     ]
 
     RULE_BASED_MODEL_RULES = {
-        'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
-        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
-
         'request': ['what is', 'where is', 'can you tell', 'post code', 'address', 'location', 'phone', 'number', 'could i get', 'request', 'find', 'search', 'detail'],
         'reqmore': ['more', 'additional', 'extra', 'any more', 'other', 'further'],
         'reqalts': ['how about', 'alternative', 'other', 'other options', 'alternatives', 'another', 'another suggestion', 'different', 'else', 'instead'],
@@ -78,6 +75,9 @@ class RestaurantRecommendationSystem:
         'confirm': ['confirm', 'is it', 'check if', 'right?', 'verify', 'am i correct', 'confirming', 'confirmation', 'can you confirm'],
         'affirm': ['yes', 'yeah', 'right', 'correct', 'sure', 'absolutely', 'definitely', 'of course', 'affirm', 'indeed'],
         'thankyou': ['thank', 'thanks', 'appreciate', 'grateful', 'thank you', 'many thanks', 'thankful'],
+
+        'hello': ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy'],
+        'inform': ['restaurant', 'food', 'place', 'serves', 'i need', 'looking for', 'preference', 'information', 'moderate price', 'any part of town', 'south part of town'],
 
         'repeat': ['repeat', 'again', 'say again', 'can you repeat', 'could you repeat', 'pardon'],
         'restart': ['restart', 'start over', 'begin again', 'reset', 'new', 'begin anew'],
@@ -515,7 +515,7 @@ class RestaurantRecommendationSystem:
 
         dialog_act = self.dialog_act_prediction()
 
-        # If dialog act is bye, ack, or affirm, go to the "end" state
+        # If dialog act is bye, go to the "end" state
         if dialog_act in ("bye"):
             return self.END_STATE
         
