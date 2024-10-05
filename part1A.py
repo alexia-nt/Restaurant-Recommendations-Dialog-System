@@ -73,31 +73,6 @@ def create_dataframe_no_dup(df):
 
     return df_no_dup
 
-def generate_barplots(df):
-    """
-    Generates a bar plot visualizing the distribution of utterance lengths (number of words) in the given DataFrame.
-
-    Args:
-        df: A Pandas DataFrame with 'label' and 'utterance' columns.
-    """
-    count = df['utterance'].str.split().str.len()
-    count.index = count.index.astype(str) + ' words:'
-    count.value_counts().plot(logy=True, kind='bar', color='green', title='Distribution of # words per utterance of original dataset')
-    
-    plt.xlabel('# words in utterance', labelpad=12)
-    plt.ylabel('Count')
-
-    # Adjust layout to prevent labels from being cut off
-    plt.tight_layout()
-
-    # Create the 'figures' directory if it doesn't exist
-    figures_dir = "figures"
-    os.makedirs(figures_dir, exist_ok=True)
-    
-    # Save the plot in the 'figures' directory
-    plot_filename = os.path.join(figures_dir, "Number of words per utterance.png")
-    plt.savefig(plot_filename)
-
 def return_majority_label(df):
     """
     Returns the most frequent label in the DataFrame.
@@ -331,8 +306,6 @@ def print_menu():
 if __name__ == "__main__":
     # Load the data into a DataFrame
     df = create_dataframe(DATA_FILE)
-
-    # generate_barplots(df)
 
     # Create dataframe without duplicates
     df_no_dup = create_dataframe_no_dup(df)
