@@ -450,8 +450,6 @@ class RestaurantRecommendationSystem:
                 self.filtered_df.loc[index, "assignedseats"] = 1
                 self.filtered_df.loc[index, "romantic"] = 0
 
-        # print(self.filtered_df)
-
     def get_matching_restaurants(self):
         """
         Filters the restaurant dataset based on user preferences and
@@ -486,8 +484,6 @@ class RestaurantRecommendationSystem:
         If the user has not specified what details they want, system
         asks user until a valid answer is given and then prints details.
         """
-        # time.sleep(self.delay_preference)
-        # print(f"I have the following details for {self.possible_restaurants[0]['restaurantname']} restaurant:")
         gave_details = False
 
         # Check if the user asks for the phone number
@@ -559,8 +555,6 @@ class RestaurantRecommendationSystem:
         elif self.additional_preference == "romantic":
             #Filter the restaurants based on the additional preference
             self.filtered_df = self.filtered_df[self.filtered_df['romantic'] == 1]
-
-        # print(self.filtered_df)
 
         return self.filtered_df.to_dict(orient='records')
         
