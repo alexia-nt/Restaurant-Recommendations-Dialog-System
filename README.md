@@ -1,5 +1,5 @@
 # Restaurant-Recommendations-Dialog-System
-This is a restaurant recommendations dialog system.
+This is a restaurant recommendations dialog system. It was developed as part of the "Methods in AI Research" course for the Master's in AI at Utrecht University.
 
 ## Table of Contents
 
